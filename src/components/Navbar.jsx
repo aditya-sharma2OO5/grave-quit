@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { PlusCircle, User, Feather } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 
 export const Navbar = () => {
   const location = useLocation();
-  const { setIsAddItemModalOpen } = useGraveyard();
+  const { setIsAddItemModalOpen } = useGravequit();
 
   const navLinks = [
     { path: '/items', label: 'My Items' },
@@ -28,7 +28,7 @@ export const Navbar = () => {
           </div>
           <div>
             <span className="text-lg font-extrabold tracking-tight font-headline text-[#F5F5F0]">
-              Graveyard
+              Gravequit
             </span>
             {/* MANDATORY SUBTITLE: ALWAYS "Quiet Closure" */}
             <span className="block text-[10px] text-[#8A8A8A] font-medium tracking-wider uppercase -mt-1">

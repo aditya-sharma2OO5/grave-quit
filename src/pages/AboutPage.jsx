@@ -17,7 +17,7 @@ export const AboutPage = () => {
             <Feather className="w-6 h-6 text-[#A8C5B0]" />
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold font-headline text-[#F5F5F0]">
-            Why We Built Graveyard
+            Why We Built Gravequit
           </h1>
           <p className="text-base text-[#8A8A8A] max-w-xl mx-auto">
             A digital sanctuary dedicated to quiet closure, intentional reflection, and ending pursuits without shame.
@@ -43,7 +43,7 @@ export const AboutPage = () => {
         </div>
 
         {/* What This Isn't Section */}
-        <Card header="What Graveyard Is NOT" headerAccent={true}>
+        <Card header="What Gravequit Is NOT" headerAccent={true}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 bg-[#131313] border border-[#2A2A2A] rounded-xl space-y-2">
               <ShieldX className="w-5 h-5 text-[#8A8A8A]" />

@@ -87,7 +87,7 @@ export const PrivacyPage = () => {
         <div className="p-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-center space-y-2">
           <h3 className="text-base font-bold font-headline text-[#F5F5F0]">Questions About Privacy?</h3>
           <p className="text-xs text-[#8A8A8A]">
-            Contact our privacy compliance team directly at privacy@graveyard.ai
+            Contact our privacy compliance team directly at privacy@gravequit.ai
           </p>
         </div>
 

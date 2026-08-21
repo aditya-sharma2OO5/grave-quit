@@ -7,9 +7,9 @@ import {
   VALID_REASON_TAGS 
 } from '../data/mockData';
 
-const GraveyardContext = createContext(null);
+const GravequitContext = createContext(null);
 
-export const GraveyardProvider = ({ children }) => {
+export const GravequitProvider = ({ children }) => {
   const [items, setItems] = useState(INITIAL_ITEMS);
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
@@ -155,7 +155,7 @@ export const GraveyardProvider = ({ children }) => {
   };
 
   return (
-    <GraveyardContext.Provider value={{
+    <GravequitContext.Provider value={{
       items,
       patternStats,
       advisorMetrics: INITIAL_ADVISOR_METRICS,
@@ -174,12 +174,12 @@ export const GraveyardProvider = ({ children }) => {
       deleteAccount
     }}>
       {children}
-    </GraveyardContext.Provider>
+    </GravequitContext.Provider>
   );
 };
 
-export const useGraveyard = () => {
-  const ctx = useContext(GraveyardContext);
-  if (!ctx) throw new Error('useGraveyard must be used within a GraveyardProvider');
+export const useGravequit = () => {
+  const ctx = useContext(GravequitContext);
+  if (!ctx) throw new Error('useGravequit must be used within a GravequitProvider');
   return ctx;
 };

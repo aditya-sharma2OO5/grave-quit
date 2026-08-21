@@ -30,7 +30,7 @@ export const ShareCardPreview = ({
             </div>
             <div>
               <span className="text-sm font-bold font-headline tracking-tight text-[#F5F5F0]">
-                Graveyard AI
+                Gravequit AI
               </span>
               <span className="block text-[9px] text-[#8A8A8A] uppercase tracking-widest font-semibold">
                 Quiet Closure Insight

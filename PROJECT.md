@@ -1,12 +1,12 @@
-# Graveyard — Full Project Explanation
+# Gravequit — Full Project Explanation
 
 ## What This Project Is
 
-Graveyard is a quitting journal for students. It helps them understand *why* they personally keep quitting things — courses, habits, side projects, skills — instead of giving generic motivational advice or shaming them for stopping.
+Gravequit is a quitting journal for students. It helps them understand *why* they personally keep quitting things — courses, habits, side projects, skills — instead of giving generic motivational advice or shaming them for stopping.
 
-**The core insight:** most self-reflection tools ask you to journal after the fact, when the real reason has already faded. Graveyard captures the reason in a 10-second flow, right at the moment someone quits — this is what makes the resulting data meaningful and honest.
+**The core insight:** most self-reflection tools ask you to journal after the fact, when the real reason has already faded. Gravequit captures the reason in a 10-second flow, right at the moment someone quits — this is what makes the resulting data meaningful and honest.
 
-Graveyard is explicitly **NOT**:
+Gravequit is explicitly **NOT**:
 - A sobriety or addiction-recovery tracker
 - A gamified habit-streak app (no badges, no "days free," no punishing broken streaks)
 - A surveillance tool for institutions

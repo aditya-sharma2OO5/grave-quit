@@ -1,11 +1,11 @@
 import React from 'react';
 import { Mail, Bell, Download, Trash2, ShieldAlert, Check } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 
 export const SettingsPage = () => {
-  const { settings, setSettings, deleteAccount, items } = useGraveyard();
+  const { settings, setSettings, deleteAccount, items } = useGravequit();
 
   const toggleWeeklyDigest = () => {
     setSettings(prev => ({ ...prev, weeklyDigest: !prev.weeklyDigest }));
@@ -19,7 +19,7 @@ export const SettingsPage = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "graveyard_student_data.json");
+    downloadAnchor.setAttribute("download", "gravequit_student_data.json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();

@@ -3,11 +3,11 @@ import { Share2, Download, Copy, Check, ShieldCheck, Sparkles } from 'lucide-rea
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ShareCardPreview } from '../components/ShareCardPreview';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { VALID_REASON_TAGS } from '../data/mockData';
 
 export const ShareableInsightPage = () => {
-  const { patternStats } = useGraveyard();
+  const { patternStats } = useGravequit();
   const [selectedTag, setSelectedTag] = useState('No Deadline');
   const [copied, setCopied] = useState(false);
 

@@ -26,7 +26,7 @@ export const LoginPage = () => {
             <Feather className="w-6 h-6 text-[#A8C5B0]" />
           </div>
           <h1 className="text-2xl font-bold font-headline text-[#F5F5F0]">
-            {isSignUp ? 'Create Your Sanctuary' : 'Welcome Back to Graveyard'}
+            {isSignUp ? 'Create Your Sanctuary' : 'Welcome Back to Gravequit'}
           </h1>
           <p className="text-xs text-[#8A8A8A]">
             {isSignUp 

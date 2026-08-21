@@ -27,7 +27,7 @@ export const LandingPage = () => {
           </h1>
 
           <p className="text-base md:text-lg text-[#8A8A8A] max-w-2xl mx-auto font-body leading-relaxed">
-            Graveyard is a quitting journal for students. It captures the real reasons you pause courses, habits, and projects in a 10-second flow right at the moment of stopping — turning stopping into self-discovery.
+            Gravequit is a quitting journal for students. It captures the real reasons you pause courses, habits, and projects in a 10-second flow right at the moment of stopping — turning stopping into self-discovery.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -64,7 +64,7 @@ export const LandingPage = () => {
               The 10-Second Reason-Capture Flow
             </h2>
             <p className="text-sm text-[#8A8A8A] max-w-xl mx-auto">
-              Most tools ask you to reflect weeks later when the real reason has faded. Graveyard records honest signals at the moment of stopping.
+              Most tools ask you to reflect weeks later when the real reason has faded. Gravequit records honest signals at the moment of stopping.
             </p>
           </div>
 
