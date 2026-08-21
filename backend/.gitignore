@@ -13,3 +13,6 @@ venv.bak/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Machine Learning Models
+*.pkl
