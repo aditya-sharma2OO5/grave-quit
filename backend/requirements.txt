@@ -6,3 +6,6 @@ python-dotenv
 pydantic
 anthropic
 python-multipart
+scikit-learn
+joblib
+numpy
