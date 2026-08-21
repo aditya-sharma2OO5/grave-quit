@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, AlertTriangle, ShieldCheck, RotateCcw, Layers, Mic } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { TagPill } from '../components/TagPill';
@@ -9,7 +9,7 @@ import { TagPill } from '../components/TagPill';
 export const ItemDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { items, openQuitModal, recommitItem } = useGraveyard();
+  const { items, openQuitModal, recommitItem } = useGravequit();
 
   const item = items.find(i => i.id === id) || items[0];
   const isActive = item?.status === 'active';

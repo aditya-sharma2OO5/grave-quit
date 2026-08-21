@@ -1,5 +1,5 @@
 ---
-name: Graveyard
+name: Gravequit
 colors:
   surface: '#131313'
   surface-dim: '#131313'
@@ -154,8 +154,8 @@ The shape language is "Soft Geometric." Most UI elements use a 12px to 16px corn
 
 ## Global Components (use identically on every page — do not restyle per page)
 
-- **Top Navigation (authenticated pages):** Logo 'Graveyard' left, nav links 'My Items / Dashboard / Insights' center-right, profile icon far right. Sidebar subtitle under the logo always reads exactly **"Quiet Closure"** — never any other variant (e.g. not "Digital Sanctuary," not "Quiet Sanctuary").
-- **Footer:** Always reads exactly **"© 2026 Graveyard AI. Precision in Letting Go."** on the left, and **"Privacy Policy · Terms of Service · Ethics"** on the right, on every single page without exception.
+- **Top Navigation (authenticated pages):** Logo 'Gravequit' left, nav links 'My Items / Dashboard / Insights' center-right, profile icon far right. Sidebar subtitle under the logo always reads exactly **"Quiet Closure"** — never any other variant (e.g. not "Digital Sanctuary," not "Quiet Sanctuary").
+- **Footer:** Always reads exactly **"© 2026 Gravequit AI. Precision in Letting Go."** on the left, and **"Privacy Policy · Terms of Service · Ethics"** on the right, on every single page without exception.
 - **Buttons:**
     - *Primary:* Solid `#F5F5F0` fill with `#0A0A0A` text. High contrast, used for the main action of a page (e.g. "Start your journal," "Add to My Items," "Save & Let Go").
     - *Secondary:* `#1A1A1A` fill with a 1px `#2A2A2A` border and `#F5F5F0` text.

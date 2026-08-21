@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, Calendar, BookOpen, Layers } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Button } from './Button';
 
 export const AddItemModal = () => {
-  const { isAddItemModalOpen, setIsAddItemModalOpen, addItem } = useGraveyard();
+  const { isAddItemModalOpen, setIsAddItemModalOpen, addItem } = useGravequit();
   
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Course');

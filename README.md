@@ -7,9 +7,9 @@
 
 ## 🌟 Overview
 
-**Graveyard** is explicitly **NOT** a gamified habit-streak tracker, **NOT** an addiction-recovery app, and **NOT** a student surveillance tool. 
+**Gravequit** is explicitly **NOT** a gamified habit-streak tracker, **NOT** an addiction-recovery app, and **NOT** a student surveillance tool. 
 
-Most self-reflection tools ask you to journal weeks after the fact, when the real reason has already faded. Graveyard captures honest signals in a **10-second flow** right at the moment of stopping. The tone throughout is calm, observational, and kind — never clinical, never guilt-inducing, never punitive.
+Most self-reflection tools ask you to journal weeks after the fact, when the real reason has already faded. Gravequit captures honest signals in a **10-second flow** right at the moment of stopping. The tone throughout is calm, observational, and kind — never clinical, never guilt-inducing, never punitive.
 
 ---
 
@@ -59,7 +59,7 @@ Adheres strictly to the **Minimalist-Noir** visual identity:
 - **Palette**: Void background (`#0A0A0A`), Elevated surfaces (`#1A1A1A`), Borders (`#2A2A2A`), Sage Green accent (`#A8C5B0`).
 - **Typography**: **Manrope** (Headlines) + **Inter** (Body/Labels).
 - **Navigation Subtitle**: Under logo always reads **`"Quiet Closure"`**.
-- **Footer Text**: Always reads `"© 2026 Graveyard AI. Precision in Letting Go."` on left and `"Privacy Policy · Terms of Service · Ethics"` on right.
+- **Footer Text**: Always reads `"© 2026 Gravequit AI. Precision in Letting Go."` on left and `"Privacy Policy · Terms of Service · Ethics"` on right.
 - **Red Alert Control**: Muted red/warning outline (`#93000A` / `#FFB4AB`) is used **exclusively** for the destructive "Delete Account" action on Settings. No punitive red colors exist anywhere else.
 
 ---
@@ -70,7 +70,7 @@ Adheres strictly to the **Minimalist-Noir** visual identity:
 - **Styling**: Tailwind CSS + Custom CSS Variables & Ambient Glass Effects
 - **Icons**: Lucide React
 - **Routing**: React Router DOM v6
-- **State Management**: React Context API (`GraveyardContext`)
+- **State Management**: React Context API (`GravequitContext`)
 - **AI Orchestration Architecture**: Claude API + LangGraph Multi-Agent Pipeline (Extractor, Pattern Agent, Narrator) with RAG Retrieval & Code Fact-Check Layer
 
 ---

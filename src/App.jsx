@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { GraveyardProvider } from './context/GraveyardContext';
+import { GravequitProvider } from './context/GravequitContext';
 
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -21,7 +21,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 
 export function App() {
   return (
-    <GraveyardProvider>
+    <GravequitProvider>
       <Router>
         <div className="flex flex-col min-h-screen bg-[#0A0A0A] text-[#F5F5F0] font-body selection:bg-[#A8C5B0] selection:text-[#0A0A0A]">
           
@@ -54,7 +54,7 @@ export function App() {
 
         </div>
       </Router>
-    </GraveyardProvider>
+    </GravequitProvider>
   );
 }
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import { ShieldCheck, Users, Building2, BarChart2, AlertCircle, HeartHandshake } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 
 export const AdvisorDashboardPage = () => {
-  const { advisorMetrics } = useGraveyard();
+  const { advisorMetrics } = useGravequit();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8 space-y-8">

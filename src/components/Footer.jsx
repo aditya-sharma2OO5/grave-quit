@@ -7,7 +7,7 @@ export const Footer = () => {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Left exact requirement */}
         <div>
-          <span>© 2026 Graveyard AI. Precision in Letting Go.</span>
+          <span>© 2026 Gravequit AI. Precision in Letting Go.</span>
         </div>
 
         {/* Right exact requirement */}

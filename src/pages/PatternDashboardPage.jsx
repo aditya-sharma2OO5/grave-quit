@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles, TrendingUp, Clock, ShieldCheck, PieChart, Info, ArrowUpRight } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 import { Button } from '../components/Button';
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const PatternDashboardPage = () => {
   const navigate = useNavigate();
-  const { patternStats, items } = useGraveyard();
+  const { patternStats, items } = useGravequit();
   const activeItems = items.filter(i => i.status === 'active');
 
   return (

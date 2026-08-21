@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { X, Mic, MicOff, CheckCircle2, Feather } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { VALID_REASON_TAGS } from '../data/mockData';
 import { Button } from './Button';
 import { TagPill } from './TagPill';
 
 export const QuitFlowModal = () => {
-  const { isQuitModalOpen, activeQuitItem, closeQuitModal, submitQuitEvent } = useGraveyard();
+  const { isQuitModalOpen, activeQuitItem, closeQuitModal, submitQuitEvent } = useGravequit();
 
   const [selectedTag, setSelectedTag] = useState('No Deadline');
   const [reasonText, setReasonText] = useState('');

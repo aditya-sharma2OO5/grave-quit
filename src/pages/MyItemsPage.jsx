@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ArrowUpRight, Clock, AlertCircle, RotateCcw, CheckCircle2 } from 'lucide-react';
-import { useGraveyard } from '../context/GraveyardContext';
+import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { TagPill } from '../components/TagPill';
 
 export const MyItemsPage = () => {
   const navigate = useNavigate();
-  const { items, setIsAddItemModalOpen, openQuitModal, recommitItem } = useGraveyard();
+  const { items, setIsAddItemModalOpen, openQuitModal, recommitItem } = useGravequit();
 
   const activeItems = items.filter(i => i.status === 'active');
   const quitItems = items.filter(i => i.status === 'quit');
