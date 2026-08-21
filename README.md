@@ -1,4 +1,4 @@
-# 🪦 Graveyard — Quiet Closure & Quitting Insights for Students
+# 🪦 Gravequit — Quiet Closure & Quitting Insights for Students
 
 > **Understand why you quit, without the guilt.**  
 > A digital sanctuary for students to capture the real reasons they pause courses, habits, skills, and side projects right at the moment of stopping — turning quitting into self-discovery.
