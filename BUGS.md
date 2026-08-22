@@ -49,6 +49,23 @@ The `/patterns/summary` API endpoint was still calling the old, standalone `ai_s
 
 ---
 
+### BUG-005 & BUG-006 — Missing Items CRUD & Quit Flow
+**Severity:** Medium (Missing Features)
+**Fixed:** 2026-08-22
+**Files affected:**
+- `backend/routers/items.py`
+- `backend/schemas.py`
+
+**Problem:**
+The frontend had no API endpoints to list items, create items, or execute the core 10-second quit flow.
+
+**Fix:**
+1. Created `ItemCreate`, `ItemResponse`, `QuitRequest`, and `QuitResponse` schemas.
+2. Implemented `GET /items` and `POST /items` endpoints.
+3. Implemented `PATCH /items/{id}/quit` which sets the item status to 'quit', records the `QuitReason`, and implicitly invalidates the AI pattern summary cache by changing the `total_quit` count.
+
+---
+
 ## Open Bugs
 
 See the active items in code_review.md (artifacts directory).

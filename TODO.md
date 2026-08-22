@@ -29,6 +29,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 - `similar_entries` (Array of past reasons)
 See the updated `api_contract.md` for the exact response structure.
 
+### [ ] Hook up Items API (CRUD & Quit Flow)
+**Context:** The missing CRUD endpoints for items (Bugs #5 and #6) have been implemented.
+**Action Required:** Ensure the frontend calls these routes correctly:
+- `GET /items` to load the user's dashboard.
+- `POST /items` when adding a new tracked item.
+- `PATCH /items/{id}/quit` for the 10-second reason capture flow. (Note: Only `too_busy`, `too_hard`, `lost_interest`, `no_deadline`, `other` are valid `reason_tag`s).
+
 ---
 
 ## AI/ML (Dev B)
