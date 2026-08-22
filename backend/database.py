@@ -5,13 +5,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./gravequit.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Use SQLite specifically for offline testing if Postgres URL isn't fully set
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    engine = create_engine(DATABASE_URL)
+if not DATABASE_URL:
+    raise ValueError(
+        "CRITICAL: DATABASE_URL environment variable is not set. "
+        "Please add it to your backend/.env file before starting the server."
+    )
+
+engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
