@@ -42,6 +42,12 @@ class QuitRiskModel:
         if not os.path.exists(MODEL_PATH):
             self.train_on_synthetic_data()
         self.model = joblib.load(MODEL_PATH)
+        
+    def train(self, X, y):
+        self.model = LogisticRegression()
+        self.model.fit(X, y)
+        joblib.dump(self.model, MODEL_PATH)
+        print("Model retrained on real data and saved to", MODEL_PATH)
 
     def predict_risk(self, days_active: int, user_total_quit: int, user_total_completed: int) -> float:
         if self.model is None:

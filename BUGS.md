@@ -66,6 +66,22 @@ The frontend had no API endpoints to list items, create items, or execute the co
 
 ---
 
+### BUG-007 — ML model trained on synthetic data
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-22
+**Files affected:**
+- `backend/ml_model.py`
+- `backend/routers/admin.py` (new)
+- `backend/main.py`
+
+**Problem:**
+The quit-risk model was originally hardcoded to train on 8 synthetic rows, meaning it couldn't adapt to real user behavior in production.
+
+**Fix:**
+Created an administrative endpoint (`POST /admin/retrain`) that fetches all historical "quit" and "completed" items from the real database, computes the actual feature distributions, and dynamically retrains the `risk_model.pkl` on real human behavior. (Note: Added a task in `TODO.md` to secure this endpoint before launch).
+
+---
+
 ## Open Bugs
 
 See the active items in code_review.md (artifacts directory).
