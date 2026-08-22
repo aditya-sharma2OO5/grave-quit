@@ -36,8 +36,14 @@ See the updated `api_contract.md` for the exact response structure.
 - `POST /items` when adding a new tracked item.
 - `PATCH /items/{id}/quit` for the 10-second reason capture flow. (Note: Only `too_busy`, `too_hard`, `lost_interest`, `no_deadline`, `other` are valid `reason_tag`s).
 
+### [ ] Build "Retrain AI Model" button on Internal Dashboard
+**Context:** An admin endpoint (`POST /admin/retrain`) was built (Bug #7) to dynamically retrain the quit-risk ML model on real user data.
+**Action Required:** On the Internal Judge/Team Metrics Page (Page 10 in `PROJECT.md`), add a button to manually trigger this endpoint. Make sure it passes the required admin authentication headers once Dev B secures the route.
+
 ---
 
 ## AI/ML (Dev B)
 
-*(No pending actions yet)*
+### [ ] Secure the `/admin/retrain` endpoint
+**Context:** The `POST /admin/retrain` endpoint (added in Bug #7) allows the ML model to re-train on real user data from the database.
+**Action Required:** Currently, it is unprotected so it can be easily tested. Before production, ensure this route is locked down (e.g. requires an admin API key or specific admin JWT roles) so users cannot trigger expensive ML retraining loops.
