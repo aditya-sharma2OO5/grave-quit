@@ -11,4 +11,7 @@ class PatternStats(BaseModel):
 class PatternSummaryResponse(BaseModel):
     stats: PatternStats
     ai_summary: str
+    clusters: Optional[dict] = None
+    similar_entries: Optional[list] = None
+    risk_explanation: Optional[str] = None
     generated_at: datetime

@@ -99,6 +99,14 @@ This document serves as the shared contract between Frontend (Dev A), Backend (D
     "total_completed": 1
   },
   "ai_summary": "You've dropped 4 of your last 5 courses within about a week and a half, most often citing being too busy — and it tends to cluster right after exam periods.",
+  "clusters": {
+    "Cluster 1": ["exams took over", "midterms were too much"],
+    "Cluster 2": ["lost track of time"]
+  },
+  "similar_entries": [
+    "exams took over"
+  ],
+  "risk_explanation": "'too_busy' has come up 3 times recently",
   "generated_at": "2026-08-21T09:05:00Z"
 }
 ```

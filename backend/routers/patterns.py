@@ -39,6 +39,9 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
         return {
             "stats": stats,
             "ai_summary": cached_summary.ai_summary_text,
+            "clusters": cached_summary.clusters,
+            "similar_entries": cached_summary.similar_entries,
+            "risk_explanation": cached_summary.risk_explanation,
             "generated_at": cached_summary.generated_at
         }
 
@@ -50,16 +53,25 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
     try:
         pipeline_result = run_pipeline(item_dicts, all_reasons, latest_reason)
         summary_text = pipeline_result.get("ai_summary", "Not enough data for summary.")
+        clusters = pipeline_result.get("clusters")
+        similar_entries = pipeline_result.get("similar_entries")
+        risk_explanation = pipeline_result.get("risk_explanation")
     except Exception as e:
         # Fallback to the lightweight ai_summary script if pipeline fails
         recent_reasons = all_reasons[-5:]
         summary_text = generate_pattern_summary(stats, recent_reasons)
+        clusters = None
+        similar_entries = None
+        risk_explanation = None
     
     new_summary = PatternSummary(
         user_id=user.id,
         computed_stats=stats,
         ai_summary_text=summary_text,
         total_quit_at_generation=current_total_quit,
+        clusters=clusters,
+        similar_entries=similar_entries,
+        risk_explanation=risk_explanation,
         generated_at=datetime.now(datetime.UTC)
     )
     db.add(new_summary)
@@ -69,5 +81,8 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
     return {
         "stats": stats, 
         "ai_summary": summary_text,
+        "clusters": clusters,
+        "similar_entries": similar_entries,
+        "risk_explanation": risk_explanation,
         "generated_at": new_summary.generated_at
     }
