@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from stats import compute_stats
 
 def test_compute_stats():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     items = [
         {
             "status": "quit", 

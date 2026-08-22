@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 
 from auth import get_current_user
 
@@ -23,7 +23,7 @@ def create_item(item_in: ItemCreate, db: Session = Depends(get_db), user = Depen
         title=item_in.title,
         category=item_in.category,
         status="active",
-        started_at=datetime.now(datetime.UTC)
+        started_at=datetime.now(timezone.utc)
     )
     db.add(new_item)
     db.commit()
@@ -38,7 +38,7 @@ def quit_item(item_id: int, quit_in: QuitRequest, db: Session = Depends(get_db),
     if item.status != "active":
         raise HTTPException(status_code=400, detail="Only active items can be quit")
 
-    now = datetime.now(datetime.UTC)
+    now = datetime.now(timezone.utc)
     item.status = "quit"
     item.ended_at = now
 
@@ -76,7 +76,7 @@ def get_item_risk(item_id: int, db: Session = Depends(get_db), user = Depends(ge
 
     # Calculate days active
     started_at_naive = item.started_at.replace(tzinfo=None) if item.started_at.tzinfo else item.started_at
-    days_active = (datetime.utcnow() - started_at_naive).days
+    days_active = (datetime.now(timezone.utc).replace(tzinfo=None) - started_at_naive).days
     days_active = max(0, days_active)
 
     # Get user's history
