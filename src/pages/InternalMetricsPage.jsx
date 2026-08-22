@@ -1,20 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, ThumbsUp, ThumbsDown, Activity, Users, FileText, CheckCircle2, Zap } from 'lucide-react';
+import { Cpu, ThumbsUp, ThumbsDown, Activity, Users, FileText, CheckCircle2, Zap, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
-
-const API_BASE = 'http://localhost:8000';
+import { Button } from '../components/Button';
+import { useGravequit } from '../context/GravequitContext';
 
 export const InternalMetricsPage = () => {
+  const { apiBase, getAuthHeaders } = useGravequit();
   const [internalMetrics, setInternalMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [retraining, setRetraining] = useState(false);
+  const [retrainMsg, setRetrainMsg] = useState(null);
 
-  useEffect(() => {
-    fetch(`${API_BASE}/metrics/internal`)
+  const fetchMetrics = () => {
+    fetch(`${apiBase}/metrics/internal`)
       .then(r => r.json())
       .then(data => { setInternalMetrics(data); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [apiBase]);
+
+  const handleRetrain = async () => {
+    setRetraining(true);
+    setRetrainMsg(null);
+    try {
+      const res = await fetch(`${apiBase}/admin/retrain`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'X-Admin-Api-Key': 'your_super_secret_admin_key'
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRetrainMsg({ type: 'success', text: data.message || 'Model successfully retrained.' });
+        fetchMetrics();
+      } else {
+        setRetrainMsg({ type: 'error', text: data.detail || 'Retraining could not complete.' });
+      }
+    } catch (err) {
+      setRetrainMsg({ type: 'error', text: 'Network error connecting to retraining endpoint.' });
+    } finally {
+      setRetraining(false);
+    }
+  };
 
   if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Loading metrics...</div>;
   if (!internalMetrics) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load metrics. Is the backend running?</div>;
@@ -36,10 +68,48 @@ export const InternalMetricsPage = () => {
             </p>
           </div>
 
-          <div className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full text-xs text-[#8A8A8A] font-mono">
-            Status: Live System Online
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Retrain AI Model Button */}
+            <Button 
+              variant="primary" 
+              size="sm" 
+              onClick={handleRetrain} 
+              disabled={retraining}
+            >
+              {retraining ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  <span>Retraining Model...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                  <span>Retrain AI Model</span>
+                </>
+              )}
+            </Button>
+
+            <div className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full text-xs text-[#8A8A8A] font-mono">
+              Status: Live System Online
+            </div>
           </div>
         </div>
+
+        {/* Retrain Alert Notification */}
+        {retrainMsg && (
+          <div className={`p-4 rounded-xl text-xs flex items-center gap-2 border ${
+            retrainMsg.type === 'success'
+              ? 'bg-[#161E19] text-[#B0CEB8] border-[#A8C5B0]/40'
+              : 'bg-[#1C1B1B] text-[#FFB4AB] border-[#93000A]/40'
+          }`}>
+            {retrainMsg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-[#A8C5B0] shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-[#FFB4AB] shrink-0" />
+            )}
+            <span>{retrainMsg.text}</span>
+          </div>
+        )}
 
         {/* Top Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -124,7 +194,7 @@ export const InternalMetricsPage = () => {
                   <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
                     <div 
                       className="w-full max-w-[36px] bg-[#354F3E] hover:bg-[#A8C5B0] rounded-t-lg transition-all"
-                      style={{ height: `${(d.dau / 5000) * 100}%` }}
+                      style={{ height: `${Math.max(15, Math.min(100, d.dau * 20))}%` }}
                     ></div>
                     <span className="text-[10px] text-[#8A8A8A] font-mono">{d.day}</span>
                   </div>
