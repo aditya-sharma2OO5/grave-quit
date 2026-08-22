@@ -1,17 +1,17 @@
 import os
-from anthropic import Anthropic
+from groq import Groq
 from typing import Dict, List, Any
 from dotenv import load_dotenv
 
-# Load environment variables (mostly for local offline testing)
+# Load environment variables
 load_dotenv()
 
-client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+client = Groq(api_key=os.environ.get("GROQ_API_KEY", "fallback_key"))
 
 def generate_pattern_summary(stats: Dict[str, Any], recent_reasons: List[str]) -> str:
     """
     Generates a grounded plain-language summary of quitting patterns based strictly
-    on deterministic statistics.
+    on deterministic statistics using Groq.
     
     stats: output of compute_stats()
     recent_reasons: up to ~5 most recent reason_text strings
@@ -39,12 +39,12 @@ Recent reasons in the student's own words:
 Write the summary now."""
  
     try:
-        message = client.messages.create(
-            model="claude-3-5-sonnet-20240620",
-            max_tokens=200,
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
             messages=[{"role": "user", "content": prompt}],
+            max_tokens=200
         )
-        return message.content[0].text
+        return response.choices[0].message.content
     except Exception as e:
-        # Fallback if API fails
+        # Fallback if API fails (e.g. invalid key)
         return f"You've let go of {stats['total_quit']} items, usually citing '{stats['most_common_tag']}' after an average of {stats['avg_days_to_quit']} days."

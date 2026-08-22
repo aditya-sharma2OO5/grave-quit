@@ -4,7 +4,7 @@ sqlalchemy
 psycopg2-binary
 python-dotenv
 pydantic
-anthropic
+groq
 python-multipart
 scikit-learn
 joblib
