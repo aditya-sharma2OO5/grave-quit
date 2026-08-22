@@ -12,7 +12,7 @@ def test_prompt():
         "couldnt keep up with the weekly assignments"
     ]
     
-    print("Testing AI Summary Generation (Warning: needs valid ANTHROPIC_API_KEY)...\n")
+    print("Testing AI Summary Generation (Warning: needs valid GROQ_API_KEY)...\n")
     summary = generate_pattern_summary(stats, reasons)
     print("Resulting Summary:")
     print("------------------")
