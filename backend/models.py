@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -31,3 +31,12 @@ class QuitReason(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     item = relationship("Item", back_populates="reason")
+
+class PatternSummary(Base):
+    __tablename__ = "pattern_summaries"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    computed_stats = Column(JSON, nullable=False)
+    ai_summary_text = Column(Text, nullable=False)
+    total_quit_at_generation = Column(Integer, nullable=False)
+    generated_at = Column(DateTime, default=datetime.utcnow)
