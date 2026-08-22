@@ -47,3 +47,7 @@ See the updated `api_contract.md` for the exact response structure.
 ### [ ] Secure the `/admin/retrain` endpoint
 **Context:** The `POST /admin/retrain` endpoint (added in Bug #7) allows the ML model to re-train on real user data from the database.
 **Action Required:** Currently, it is unprotected so it can be easily tested. Before production, ensure this route is locked down (e.g. requires an admin API key or specific admin JWT roles) so users cannot trigger expensive ML retraining loops.
+
+### [ ] Automate ML Retraining via GitHub Actions (Optional DevOps)
+**Context:** The ML model should periodically retrain on real user data.
+**Action Required:** Create a `.github/workflows/retrain.yml` cron job that automatically hits `POST /admin/retrain` every Sunday. **Important:** Do not hardcode the API key! Store the `ADMIN_API_KEY` securely in the repository's **Settings > Secrets and variables > Actions** and pass it to the curl command via `${{ secrets.ADMIN_API_KEY }}`.
