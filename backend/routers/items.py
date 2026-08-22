@@ -3,18 +3,15 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime
 
+from auth import get_current_user
+
 from database import get_db
 from models import Item
 from ml_model import risk_model
 
 router = APIRouter()
 
-# Mock user for now
-class MockUser:
-    id = 1
 
-def get_current_user():
-    return MockUser()
 
 class RiskResponse(BaseModel):
     item_id: int

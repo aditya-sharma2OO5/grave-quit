@@ -6,15 +6,11 @@ from models import Item, PatternSummary
 from schemas import PatternSummaryResponse, PatternStats
 from stats import compute_stats
 from ai_summary import generate_pattern_summary
+from auth import get_current_user
 
 router = APIRouter()
 
-# Mocking the dependency to get a user without building full auth
-class MockUser:
-    id = 1
 
-def get_current_user():
-    return MockUser()
 
 @router.get("/patterns/summary", response_model=PatternSummaryResponse)
 def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_current_user)):
