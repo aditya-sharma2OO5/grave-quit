@@ -1,27 +1,94 @@
-from fastapi import FastAPI
+import os
+import time
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from routers import patterns, items, admin, metrics
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
 
 from database import engine, Base
+from routers import patterns, items, admin, metrics, auth, digest
+
+load_dotenv()
+
+from sqlalchemy import text
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Gravequit API")
+# Ensure columns added to models exist in DB
+try:
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS hashed_password VARCHAR;"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_opt_in BOOLEAN DEFAULT TRUE;"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reminder_opt_in BOOLEAN DEFAULT FALSE;"))
+        conn.execute(text("ALTER TABLE items ADD COLUMN IF NOT EXISTS note TEXT;"))
+        conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS clusters JSON;"))
+        conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS similar_entries JSON;"))
+        conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS risk_explanation TEXT;"))
+        conn.commit()
+except Exception as e:
+    print(f"[Startup Warning] Schema column sync notice: {e}")
 
+app = FastAPI(
+    title="Gravequit API",
+    description="A digital sanctuary for students to observe and retire commitments with clarity and zero guilt.",
+    version="1.0.0"
+)
+
+# Robust CORS configuration supporting all dev ports (5173, 5174, 3000, etc.) & production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For dev only, update for prod
+    allow_origins=["*"],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(patterns.router)
+# In-memory rate limiting map
+client_request_history = {}
+
+@app.middleware("http")
+async def rate_limit_and_options_middleware(request: Request, call_next):
+    # Always let CORS preflight OPTIONS pass through immediately
+    if request.method == "OPTIONS":
+        return await call_next(request)
+        
+    # Allow health checks and docs without rate limit
+    if request.url.path in ["/", "/docs", "/openapi.json", "/redoc"]:
+        return await call_next(request)
+        
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    
+    # Clean up timestamps older than 60 seconds
+    timestamps = client_request_history.get(client_ip, [])
+    timestamps = [t for t in timestamps if now - t < 60]
+    
+    if len(timestamps) >= 120:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Too many requests. Please slow down and try again shortly."}
+        )
+        
+    timestamps.append(now)
+    client_request_history[client_ip] = timestamps
+    
+    return await call_next(request)
+
+# Include all Routers
+app.include_router(auth.router)
 app.include_router(items.router)
-app.include_router(admin.router)
+app.include_router(patterns.router)
 app.include_router(metrics.router)
+app.include_router(admin.router)
+app.include_router(digest.router)
 
 @app.get("/")
 def root():
-    return {"message": "Gravequit API is running"}
+    return {
+        "name": "Gravequit API",
+        "status": "operational",
+        "version": "1.0.0",
+        "sanctuary_mode": "active"
+    }
