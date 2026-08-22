@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 from database import get_db
 from models import Item, PatternSummary
 from schemas import PatternSummaryResponse, PatternStats
@@ -72,7 +72,7 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
         clusters=clusters,
         similar_entries=similar_entries,
         risk_explanation=risk_explanation,
-        generated_at=datetime.now(datetime.UTC)
+        generated_at=datetime.now(timezone.utc)
     )
     db.add(new_summary)
     db.commit()

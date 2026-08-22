@@ -329,9 +329,9 @@ def run_pipeline(items: List[Dict[str, Any]], reason_texts: List[str], latest_re
 # ─── Standalone test ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     mock_items = [
         {"status": "quit", "started_at": now - timedelta(days=10), "ended_at": now - timedelta(days=1), "reason_tag": "Too Busy"},
