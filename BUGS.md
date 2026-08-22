@@ -32,6 +32,23 @@ with a real JWT validation check when the Supabase integration is ready.
 
 ---
 
+### BUG-002 — `ai_summary.py` is redundant with `pipeline.py`
+**Severity:** High (Architectural gap)
+**Fixed:** 2026-08-22
+**Files affected:**
+- `backend/routers/patterns.py`
+- `backend/ai_summary.py` (kept as lightweight fallback)
+
+**Problem:**
+The `/patterns/summary` API endpoint was still calling the old, standalone `ai_summary.py` file to generate the AI summary. This meant it bypassed all the LangGraph agents (Extractor, Pattern, Narrator) built during Day 5, losing the clustering, RAG context, and grounding validation.
+
+**Fix:**
+1. Updated `routers/patterns.py` to call `run_pipeline()` from `pipeline.py`.
+2. Passed the full `items` history and `reason_texts` to the pipeline so the Pattern agent can perform clustering and similarity search.
+3. Added a try/except block in the router that calls the standalone `ai_summary.py` as a lightweight fallback if the full pipeline fails.
+
+---
+
 ## Open Bugs
 
 See the active items in code_review.md (artifacts directory).
