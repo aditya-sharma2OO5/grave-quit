@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Users, Building2, BarChart2, AlertCircle, HeartHandshake } from 'lucide-react';
-import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 
+const API_BASE = 'http://localhost:8000';
+
 export const AdvisorDashboardPage = () => {
-  const { advisorMetrics } = useGravequit();
+  const [advisorMetrics, setAdvisorMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/metrics/advisor`)
+      .then(r => r.json())
+      .then(data => { setAdvisorMetrics(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Loading advisor data...</div>;
+  if (!advisorMetrics) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load advisor data. Is the backend running?</div>;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8 space-y-8">

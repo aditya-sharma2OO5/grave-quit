@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Cpu, ThumbsUp, ThumbsDown, Activity, Users, FileText, CheckCircle2, Zap } from 'lucide-react';
-import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 
+const API_BASE = 'http://localhost:8000';
+
 export const InternalMetricsPage = () => {
-  const { internalMetrics } = useGravequit();
+  const [internalMetrics, setInternalMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/metrics/internal`)
+      .then(r => r.json())
+      .then(data => { setInternalMetrics(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Loading metrics...</div>;
+  if (!internalMetrics) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load metrics. Is the backend running?</div>;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8 space-y-8">

@@ -27,8 +27,7 @@ from grounding import validate_claims, GroundingError
 load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise ValueError("CRITICAL: GROQ_API_KEY is missing from the environment. The LangGraph pipeline cannot run without it.")
+
 
 # ─── Shared State ────────────────────────────────────────────────
 
