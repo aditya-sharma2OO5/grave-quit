@@ -9,3 +9,5 @@ python-multipart
 scikit-learn
 joblib
 numpy
+langgraph
+langchain-groq
