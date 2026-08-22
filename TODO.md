@@ -21,7 +21,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 ## Frontend (Dev C)
 
-*(No pending actions yet)*
+### [ ] Render LangGraph pipeline data in Pattern Dashboard
+**Context:** The `/patterns/summary` endpoint was upgraded (Bug #4) to return the full AI pipeline data instead of just the summary paragraph.
+**Action Required:** Update the frontend data models and UI to handle and display:
+- `clusters` (JSON dict of categorized reasons)
+- `risk_explanation` (The "Why this prediction" string)
+- `similar_entries` (Array of past reasons)
+See the updated `api_contract.md` for the exact response structure.
 
 ---
 

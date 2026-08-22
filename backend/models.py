@@ -39,4 +39,10 @@ class PatternSummary(Base):
     computed_stats = Column(JSON, nullable=False)
     ai_summary_text = Column(Text, nullable=False)
     total_quit_at_generation = Column(Integer, nullable=False)
+    
+    # LangGraph pipeline data
+    clusters = Column(JSON, nullable=True)
+    similar_entries = Column(JSON, nullable=True)
+    risk_explanation = Column(Text, nullable=True)
+    
     generated_at = Column(DateTime, default=datetime.utcnow)
