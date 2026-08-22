@@ -8,6 +8,7 @@ venv.bak/
 # Environment Variables
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
