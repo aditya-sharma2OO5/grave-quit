@@ -6,6 +6,7 @@ from models import Item, PatternSummary
 from schemas import PatternSummaryResponse, PatternStats
 from stats import compute_stats
 from ai_summary import generate_pattern_summary
+from pipeline import run_pipeline
 from auth import get_current_user
 
 router = APIRouter()
@@ -42,15 +43,24 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
         }
 
     # Generate new summary if cache is invalid or missing
-    recent_reasons = [i.reason.reason_text for i in items if i.reason and i.reason.reason_text][-5:]
-    summary_text = generate_pattern_summary(stats, recent_reasons)
+    # We pass all reasons to the pipeline for clustering/RAG
+    all_reasons = [i.reason.reason_text for i in items if i.reason and i.reason.reason_text]
+    latest_reason = all_reasons[-1] if all_reasons else ""
+    
+    try:
+        pipeline_result = run_pipeline(item_dicts, all_reasons, latest_reason)
+        summary_text = pipeline_result.get("ai_summary", "Not enough data for summary.")
+    except Exception as e:
+        # Fallback to the lightweight ai_summary script if pipeline fails
+        recent_reasons = all_reasons[-5:]
+        summary_text = generate_pattern_summary(stats, recent_reasons)
     
     new_summary = PatternSummary(
         user_id=user.id,
         computed_stats=stats,
         ai_summary_text=summary_text,
         total_quit_at_generation=current_total_quit,
-        generated_at=datetime.utcnow()
+        generated_at=datetime.now(datetime.UTC)
     )
     db.add(new_summary)
     db.commit()
