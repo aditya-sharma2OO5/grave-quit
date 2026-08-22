@@ -40,7 +40,7 @@ Write the summary now."""
  
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="qwen/qwen3.6-27b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200
         )
