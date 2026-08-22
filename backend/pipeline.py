@@ -12,6 +12,7 @@ validated, hallucination-proof insight paragraph.
 
 import os
 import json
+import re
 from typing import TypedDict, List, Dict, Any, Optional
 from dotenv import load_dotenv
 
@@ -24,6 +25,10 @@ from rag_retrieval import retrieve_similar_entries
 from grounding import validate_claims, GroundingError
 
 load_dotenv()
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise ValueError("CRITICAL: GROQ_API_KEY is missing from the environment. The LangGraph pipeline cannot run without it.")
 
 # ─── Shared State ────────────────────────────────────────────────
 
@@ -183,7 +188,6 @@ Respond with ONLY the JSON, no other text."""
         raw = response.content.strip()
         
         # Strip Qwen-style <think>...</think> blocks
-        import re
         raw = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
         
         # Handle markdown code blocks
