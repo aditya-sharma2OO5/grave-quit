@@ -82,6 +82,31 @@ Created an administrative endpoint (`POST /admin/retrain`) that fetches all hist
 
 ---
 
+### BUG-008 & BUG-009 — Code Quality (Deprecations & Imports)
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-22
+**Files affected:**
+- `backend/models.py`, `backend/routers/items.py`, `backend/routers/patterns.py`, `backend/pipeline.py`, `backend/test_stats.py`
+
+**Fix:**
+1. Replaced all deprecated `datetime.utcnow()` calls with Python 3.11+ compatible `datetime.now(timezone.utc)`.
+2. Moved `import re` from inside the `narrator_agent` function to the top of `pipeline.py` for PEP 8 compliance.
+
+---
+
+### BUG-010 & BUG-011 — Polish (Module Init & Secrets Validation)
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-22
+**Files affected:**
+- `backend/routers/__init__.py` (new)
+- `backend/pipeline.py`
+
+**Fix:**
+1. Added an empty `__init__.py` to `backend/routers/` to ensure Python and test discovery tools treat it as a proper module.
+2. Added an explicit `ValueError` guard in `pipeline.py` that fails fast if `GROQ_API_KEY` is not set in `.env`, preventing cryptic Langchain errors.
+
+---
+
 ## Open Bugs
 
 See the active items in code_review.md (artifacts directory).
