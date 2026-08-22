@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
-from models import Item
+from models import Item, PatternSummary
 from schemas import PatternSummaryResponse, PatternStats
 from stats import compute_stats
 from ai_summary import generate_pattern_summary
@@ -30,13 +30,38 @@ def get_pattern_summary(db: Session = Depends(get_db), user = Depends(get_curren
         })
  
     stats = compute_stats(item_dicts)
+    current_total_quit = stats.get("total_quit", 0)
+
+    # Check for a valid cached summary
+    cached_summary = db.query(PatternSummary).filter(
+        PatternSummary.user_id == user.id,
+        PatternSummary.total_quit_at_generation == current_total_quit
+    ).order_by(PatternSummary.generated_at.desc()).first()
+
+    if cached_summary:
+        return {
+            "stats": stats,
+            "ai_summary": cached_summary.ai_summary_text,
+            "generated_at": cached_summary.generated_at
+        }
+
+    # Generate new summary if cache is invalid or missing
     recent_reasons = [i.reason.reason_text for i in items if i.reason and i.reason.reason_text][-5:]
- 
-    # Generates summary via AI. (Normally would cache this in a pattern_summaries table)
-    summary = generate_pattern_summary(stats, recent_reasons)
+    summary_text = generate_pattern_summary(stats, recent_reasons)
+    
+    new_summary = PatternSummary(
+        user_id=user.id,
+        computed_stats=stats,
+        ai_summary_text=summary_text,
+        total_quit_at_generation=current_total_quit,
+        generated_at=datetime.utcnow()
+    )
+    db.add(new_summary)
+    db.commit()
+    db.refresh(new_summary)
     
     return {
         "stats": stats, 
-        "ai_summary": summary,
-        "generated_at": datetime.utcnow()
+        "ai_summary": summary_text,
+        "generated_at": new_summary.generated_at
     }
