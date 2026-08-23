@@ -17,3 +17,7 @@ __pycache__/
 
 # Machine Learning Models
 *.pkl
+
+# Test Databases
+*.db
+*.sqlite3

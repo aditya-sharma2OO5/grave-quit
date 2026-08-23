@@ -105,8 +105,24 @@ Created an administrative endpoint (`POST /admin/retrain`) that fetches all hist
 1. Added an empty `__init__.py` to `backend/routers/` to ensure Python and test discovery tools treat it as a proper module.
 2. Added an explicit `ValueError` guard in `pipeline.py` that fails fast if `GROQ_API_KEY` is not set in `.env`, preventing cryptic Langchain errors.
 
+### BUG-012 — Test database committed to git (Data Leak)
+**Severity:** Critical (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/test_gravequit.db` (removed from tracking)
+- `backend/.gitignore` (added `*.db` and `*.sqlite3` rules)
+
+**Problem:**
+`backend/test_gravequit.db` (a 28KB SQLite database containing test user emails, hashed passwords, quit reasons, and AI feedback) was being tracked by git and pushed to GitHub. Anyone browsing the public repository could download it.
+
+**Fix:**
+1. Ran `git rm --cached backend/test_gravequit.db` to untrack the file without deleting it locally.
+2. Added `*.db` and `*.sqlite3` patterns to `backend/.gitignore` to prevent any future test databases from being committed.
+
+> **Note for all devs:** If you need to share test fixtures, use seed scripts or JSON files instead of committing binary database files.
+
 ---
 
 ## Open Bugs
 
-See the active items in code_review.md (artifacts directory).
+See the active items in code_review.md and code_audit_round2.md (artifacts directory).
