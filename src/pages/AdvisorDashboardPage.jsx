@@ -17,7 +17,7 @@ export const AdvisorDashboardPage = () => {
   }, []);
 
   if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Loading advisor data...</div>;
-  if (!advisorMetrics) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load advisor data. Is the backend running?</div>;
+  if (!advisorMetrics || advisorMetrics.detail || !advisorMetrics.closureDrivers) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load advisor data. Is the backend running, and are you logged in?</div>;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8 space-y-8">

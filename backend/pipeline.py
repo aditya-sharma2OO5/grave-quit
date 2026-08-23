@@ -23,7 +23,6 @@ from clustering import cluster_reasons
 from rag_retrieval import retrieve_similar_entries
 from grounding import validate_claims, GroundingError
 
-load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 if not GROQ_API_KEY:

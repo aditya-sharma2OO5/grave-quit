@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
+load_dotenv()
+
 from database import engine, Base
 from routers import patterns, items, admin, metrics, auth, digest
-
-load_dotenv()
 
 from sqlalchemy import text
 
