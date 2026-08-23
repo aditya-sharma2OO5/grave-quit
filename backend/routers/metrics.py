@@ -4,10 +4,11 @@ from sqlalchemy import func
 from datetime import datetime, timezone, timedelta
 from database import get_db
 from models import Item, QuitReason, User, AIFeedback
+from auth import get_current_user
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 
-@router.get("/advisor")
+@router.get("/advisor", dependencies=[Depends(get_current_user)])
 def get_advisor_metrics(db: Session = Depends(get_db)):
     """Real aggregate stats for the Advisor Dashboard (100% anonymized)."""
 
@@ -90,7 +91,7 @@ def get_advisor_metrics(db: Session = Depends(get_db)):
     }
 
 
-@router.get("/internal")
+@router.get("/internal", dependencies=[Depends(get_current_user)])
 def get_internal_metrics(db: Session = Depends(get_db)):
     """Real internal metrics for the Judge/Team dashboard."""
 

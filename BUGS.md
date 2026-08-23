@@ -200,6 +200,20 @@ The Groq client was initialized with a hardcoded `"fallback_key"` if `GROQ_API_K
 **Fix:**
 Removed the fallback key. The script now conditionally initializes the `Groq` client only if `GROQ_API_KEY` is present. If the key is missing, `generate_pattern_summary` gracefully returns a human-readable fallback string indicating that AI features are unconfigured, preventing any crashes or API errors.
 
+### BUG-019 — Metrics endpoints fully unauthenticated
+**Severity:** Medium (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/routers/metrics.py`
+- `src/pages/AdvisorDashboardPage.jsx`
+- `src/pages/InternalMetricsPage.jsx`
+
+**Problem:**
+The `/metrics/advisor` and `/metrics/internal` endpoints were completely unauthenticated. Anyone who discovered the URLs could scrape aggregate platform statistics, user counts, quit event counts, AI accuracy rates, and recent activity feeds.
+
+**Fix:**
+Secured both routes in `metrics.py` by requiring standard JWT authentication (`Depends(get_current_user)`). Updated the `AdvisorDashboardPage` and `InternalMetricsPage` React components to fetch these endpoints using `getAuthHeaders()` from the auth context. While not strict role-based access control, this ensures that only logged-in users can view the data, fulfilling the security requirement without overly complicating the mock dashboard architecture.
+
 ---
 
 ## Open Bugs

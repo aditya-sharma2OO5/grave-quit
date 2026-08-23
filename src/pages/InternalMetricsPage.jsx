@@ -13,7 +13,7 @@ export const InternalMetricsPage = () => {
   const [retrainMsg, setRetrainMsg] = useState(null);
 
   const fetchMetrics = () => {
-    fetch(`${apiBase}/metrics/internal`)
+    fetch(`${apiBase}/metrics/internal`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(data => { setInternalMetrics(data); setLoading(false); })
       .catch(() => setLoading(false));

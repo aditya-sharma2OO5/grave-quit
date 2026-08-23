@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Users, Building2, BarChart2, AlertCircle, HeartHandshake } from 'lucide-react';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { useGravequit } from '../context/GravequitContext';
 
 export const AdvisorDashboardPage = () => {
+  const { apiBase, getAuthHeaders } = useGravequit();
   const [advisorMetrics, setAdvisorMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/metrics/advisor`)
+    fetch(`${apiBase}/metrics/advisor`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(data => { setAdvisorMetrics(data); setLoading(false); })
       .catch(() => setLoading(false));
