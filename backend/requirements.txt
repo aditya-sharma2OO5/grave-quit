@@ -11,3 +11,5 @@ joblib
 numpy
 langgraph
 langchain-groq
+pyjwt
+requests

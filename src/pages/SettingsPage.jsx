@@ -1,28 +1,56 @@
-import React from 'react';
-import { Mail, Bell, Download, Trash2, ShieldAlert, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Bell, Download, Trash2, ShieldAlert, Check, LogOut, Send, CheckCircle2, LogIn } from 'lucide-react';
 import { useGravequit } from '../context/GravequitContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 
 export const SettingsPage = () => {
-  const { settings, setSettings, deleteAccount, items } = useGravequit();
+  const navigate = useNavigate();
+  const { settings, setSettings, deleteAccount, items, isAuthenticated, user, logout, apiBase, getAuthHeaders } = useGravequit();
+  const [digestStatus, setDigestStatus] = useState(null);
 
   const toggleWeeklyDigest = () => {
-    setSettings(prev => ({ ...prev, weeklyDigest: !prev.weeklyDigest }));
+    setSettings({ weeklyDigest: !settings.weeklyDigest });
   };
 
   const toggleReminderNudges = () => {
-    setSettings(prev => ({ ...prev, reminderNudges: !prev.reminderNudges }));
+    setSettings({ reminderNudges: !settings.reminderNudges });
   };
 
   const exportData = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "gravequit_student_data.json");
+    downloadAnchor.setAttribute("download", `gravequit_observations_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+  };
+
+  const handleTestDigest = async () => {
+    try {
+      const res = await fetch(`${apiBase}/notifications/weekly-digest/preview`, {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDigestStatus(`Generated preview for ${data.user_email}: "${data.ai_summary.slice(0, 80)}..."`);
+      } else {
+        setDigestStatus("Please sign in to preview your weekly digest.");
+      }
+    } catch (e) {
+      setDigestStatus("Could not connect to notification service.");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you ABSOLUTELY sure you want to permanently delete your account and all observations? This cannot be undone.")) {
+      const success = await deleteAccount();
+      if (success) {
+        navigate('/login');
+      }
+    }
   };
 
   return (
@@ -30,11 +58,25 @@ export const SettingsPage = () => {
       <div className="max-w-3xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="pb-4 border-b border-[#2A2A2A]">
-          <h1 className="text-3xl font-extrabold font-headline text-[#F5F5F0]">Settings & Account</h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">
-            Manage your account, notification preferences, data export, and privacy.
-          </p>
+        <div className="pb-4 border-b border-[#2A2A2A] flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold font-headline text-[#F5F5F0]">Settings & Account</h1>
+            <p className="text-sm text-[#8A8A8A] mt-1">
+              Manage your account, notification preferences, data export, and privacy.
+            </p>
+          </div>
+
+          {isAuthenticated ? (
+            <Button variant="secondary" size="sm" onClick={() => { logout(); navigate('/login'); }}>
+              <LogOut className="w-3.5 h-3.5 mr-1.5" />
+              <span>Sign Out</span>
+            </Button>
+          ) : (
+            <Button variant="primary" size="sm" onClick={() => navigate('/login')}>
+              <LogIn className="w-3.5 h-3.5 mr-1.5" />
+              <span>Sign In</span>
+            </Button>
+          )}
         </div>
 
         {/* Account Info */}
@@ -46,7 +88,9 @@ export const SettingsPage = () => {
               </label>
               <div className="flex items-center gap-3 p-3 bg-[#131313] border border-[#2A2A2A] rounded-lg">
                 <Mail className="w-4 h-4 text-[#A8C5B0]" />
-                <span className="text-sm font-mono text-[#F5F5F0]">{settings.userEmail}</span>
+                <span className="text-sm font-mono text-[#F5F5F0]">
+                  {user?.email || settings.userEmail || 'student.reflect@university.edu'}
+                </span>
               </div>
             </div>
           </div>
@@ -66,7 +110,7 @@ export const SettingsPage = () => {
               <button
                 type="button"
                 onClick={toggleWeeklyDigest}
-                className={`w-12 h-6 rounded-full transition-colors relative ${
+                className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
                   settings.weeklyDigest ? 'bg-[#354F3E]' : 'bg-[#1A1A1A] border border-[#2A2A2A]'
                 }`}
               >
@@ -86,7 +130,7 @@ export const SettingsPage = () => {
               <button
                 type="button"
                 onClick={toggleReminderNudges}
-                className={`w-12 h-6 rounded-full transition-colors relative ${
+                className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
                   settings.reminderNudges ? 'bg-[#354F3E]' : 'bg-[#1A1A1A] border border-[#2A2A2A]'
                 }`}
               >
@@ -94,6 +138,19 @@ export const SettingsPage = () => {
                   settings.reminderNudges ? 'left-7' : 'left-1'
                 }`}></div>
               </button>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between">
+              <Button variant="secondary" size="sm" onClick={handleTestDigest}>
+                <Send className="w-3.5 h-3.5 mr-1.5" />
+                <span>Test Weekly Digest Preview</span>
+              </Button>
+
+              {digestStatus && (
+                <span className="text-xs text-[#A8C5B0] font-mono">
+                  {digestStatus}
+                </span>
+              )}
             </div>
 
           </div>
@@ -126,7 +183,7 @@ export const SettingsPage = () => {
             </div>
 
             <div className="pt-2">
-              <Button variant="destructive" onClick={deleteAccount}>
+              <Button variant="destructive" onClick={handleDeleteAccount}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 <span>Delete Account & Erase All Data</span>
               </Button>
