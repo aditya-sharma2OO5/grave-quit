@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 *.docx
+
+# Environment Variables
+.env
+.env.*
+!.env.example
