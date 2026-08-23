@@ -188,6 +188,18 @@ The frontend was using a hardcoded `const API_BASE = 'http://localhost:8000';`. 
 **Fix:**
 Replaced the hardcoded string with `import.meta.env.VITE_API_BASE || 'http://localhost:8000'`. This allows the Vite build process to inject the correct production backend URL while preserving local development functionality.
 
+### BUG-018 — `ai_summary.py` uses `"fallback_key"` placeholder
+**Severity:** Medium (Bug)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/ai_summary.py`
+
+**Problem:**
+The Groq client was initialized with a hardcoded `"fallback_key"` if `GROQ_API_KEY` was missing from the environment. This would cause the app to attempt to send an API request to Groq with an invalid key, resulting in a confusing 401 Unauthorized error deep in the stack trace.
+
+**Fix:**
+Removed the fallback key. The script now conditionally initializes the `Groq` client only if `GROQ_API_KEY` is present. If the key is missing, `generate_pattern_summary` gracefully returns a human-readable fallback string indicating that AI features are unconfigured, preventing any crashes or API errors.
+
 ---
 
 ## Open Bugs

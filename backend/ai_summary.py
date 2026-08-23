@@ -7,9 +7,12 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY", "fallback_key"))
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 def generate_pattern_summary(stats: Dict[str, Any], recent_reasons: List[str]) -> str:
+    if not client:
+        return "AI Summary is unavailable because the GROQ_API_KEY is not configured on the server."
     """
     Generates a grounded plain-language summary of quitting patterns based strictly
     on deterministic statistics using Groq.
