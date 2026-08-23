@@ -269,6 +269,19 @@ The frontend context `fetchItems()` function was looping over every item returne
 **Fix:**
 Calculated the risk score in bulk directly inside the `GET /items` backend endpoint and appended `risk_percentage` and `driving_factor` to the `ItemResponse` schema. Updated `GravequitContext.jsx` to map these directly from the initial items payload, entirely eliminating the N+1 API calls.
 
+### BUG-024 — Dead mock data constants
+**Severity:** Low (Cleanup)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `src/data/mockData.js`
+- `src/context/GravequitContext.jsx`
+
+**Problem:**
+The frontend still contained hardcoded mock objects like `INITIAL_ADVISOR_METRICS`, `INITIAL_INTERNAL_METRICS`, `INITIAL_ITEMS`, and `INITIAL_PATTERN_STATS`. Since the backend integration was completed, these were taking up bundle size and cluttering the codebase unnecessarily.
+
+**Fix:**
+Deleted all unused mock data structures from `mockData.js`, retaining only `VALID_REASON_TAGS`. Removed the corresponding unused imports and context variables from `GravequitContext.jsx`.
+
 ---
 
 ## Open Bugs

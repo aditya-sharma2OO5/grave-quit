@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
-import { 
-  INITIAL_ADVISOR_METRICS, 
-  INITIAL_INTERNAL_METRICS,
-  VALID_REASON_TAGS 
-} from '../data/mockData';
+import { VALID_REASON_TAGS } from '../data/mockData';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
@@ -442,8 +438,6 @@ export const GravequitProvider = ({ children }) => {
       isLoading,
       apiError,
       patternStats,
-      advisorMetrics: INITIAL_ADVISOR_METRICS,
-      internalMetrics: INITIAL_INTERNAL_METRICS,
       settings,
       setSettings: updateSettings,
       isAddItemModalOpen,
