@@ -299,10 +299,9 @@ Pinned all dependencies in `requirements.txt` to their current stable versions t
 **Fixed:** 2026-08-23
 **Files affected:**
 - `backend/main.py`
-- `backend/routers/items.py`
 
 **Problem:**
-Leftover imports like `import os` in `main.py` and `from pydantic import BaseModel` in `items.py` were cluttering the backend codebase.
+Leftover imports like `import os` in `main.py` were cluttering the backend codebase.
 
 **Fix:**
 Removed unused imports.

@@ -2,6 +2,30 @@
 
 ---
 
+## All Developers — ACTION REQUIRED ⚠️
+
+### [ ] Update Local `.env` Files
+**Context:** Following the fixes for BUG-015 and BUG-016, all insecure fallback secrets have been removed from the codebase.
+**Action Required:** Copy `backend/.env.example` to `backend/.env` and populate `JWT_SECRET_KEY` and `ADMIN_API_KEY`. If you don't do this, `docker-compose up` will fail to start, and local development will use ephemeral JWT keys that don't persist across restarts.
+
+---
+
+## DevOps / AI/ML (Dev B) — PENDING
+
+### [ ] Automate ML Retraining via GitHub Actions
+**Context:** The risk prediction model needs to be continuously updated with fresh data.
+**Action Required:** Create a `.github/workflows/retrain.yml` cron job to automatically ping the `POST /admin/retrain` endpoint. **Crucial:** You must use GitHub Secrets for the `ADMIN_API_KEY` header and not hardcode any keys in the YAML file.
+
+---
+
+## Frontend (Dev C) — PENDING
+
+### [ ] Configure Deployment Environment Variables
+**Context:** Fixed BUG-017 where the API URL was hardcoded to `localhost:8000`.
+**Action Required:** When deploying the frontend (e.g., to Vercel/Render), ensure you set the `VITE_API_BASE` environment variable to the production backend URL.
+
+---
+
 ## Backend (Dev A) — COMPLETED ✅
 
 ### [x] Replace MockAuth with Real JWT Authentication
@@ -20,6 +44,9 @@
 ### [x] Rate-Limiting & Production Deployment
 **Context:** Added rate-limiting middleware, Dockerfile, docker-compose.yml, render.yaml, and railway.json.
 
+### [x] Optimized Risk Score Fetching
+**Context:** Modified `GET /items` to bulk-compute and attach `risk_percentage` and `driving_factor` directly to the payload, avoiding N+1 API calls.
+
 ---
 
 ## Frontend (Dev C) — COMPLETED ✅
@@ -36,12 +63,18 @@
 ### [x] Build "Retrain AI Model" Button on Internal Dashboard
 **Context:** Added "Retrain AI Model" action button on `InternalMetricsPage.jsx` wired to `/admin/retrain` with live status feedback.
 
+### [x] Remove Dead Mock Data & Optimize Fetches
+**Context:** Deleted unused mock constants from `mockData.js` and updated `GravequitContext.jsx` to map bulk risk scores natively without spamming parallel requests.
+
 ---
 
-## AI/ML (Dev B) — COMPLETED ✅
+## DevOps / AI/ML (Dev B) — COMPLETED ✅
 
 ### [x] Secure the `/admin/retrain` Endpoint
 **Context:** Protected `/admin/retrain` with `X-Admin-Api-Key` header verification and regularized fallback training on live database items.
 
 ### [x] Weekly Digest & Multi-Agent LangGraph Pipeline
 **Context:** LangGraph multi-agent pipeline (Extractor -> Pattern -> Narrator -> Why-Prediction) with 100% fact-check grounding.
+
+### [x] Build Polish & Determinism
+**Context:** Pinned all Python dependencies in `backend/requirements.txt` and created a `.dockerignore` file to protect the build context.
