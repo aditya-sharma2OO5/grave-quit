@@ -135,6 +135,20 @@ Created an administrative endpoint (`POST /admin/retrain`) that fetches all hist
 1. Replaced the hard `ValueError` with a `warnings.warn()` so the server boots normally and only AI-dependent routes are affected.
 2. Changed the `ChatGroq` initialization to use the already-fetched `GROQ_API_KEY` variable (`api_key=GROQ_API_KEY or ""`).
 
+### BUG-014 — Internal assignment briefs tracked in git (Docs Leak)
+**Severity:** High (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `02_Developer_A_Backend.docx`
+- `03_Developer_B_AIML (1).docx`
+- `04_Developer_C_Frontend.docx`
+
+**Problem:**
+Internal assignment briefs containing project requirements, grading rubrics, and team structure were potentially exposed to the public. While a `*.docx` rule existed in `.gitignore`, the files were previously committed and tracked.
+
+**Fix:**
+Verified that the files are no longer tracked by git (`git ls-files` confirmed they are untracked). The existing `*.docx` rule in `.gitignore` will prevent them from being committed again.
+
 ---
 
 ## Open Bugs
