@@ -3,7 +3,7 @@ import { ShieldCheck, Users, Building2, BarChart2, AlertCircle, HeartHandshake }
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 export const AdvisorDashboardPage = () => {
   const [advisorMetrics, setAdvisorMetrics] = useState(null);

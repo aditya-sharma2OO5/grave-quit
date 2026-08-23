@@ -175,6 +175,19 @@ Verified that the files are no longer tracked by git (`git ls-files` confirmed t
 **Fix:**
 Removed the fallback values and replaced them with the `:?` bash parameter expansion (`${ADMIN_API_KEY:?ADMIN_API_KEY is required}`). This ensures that Docker Compose will fail to start and print a clear error message if these critical secrets are missing, rather than silently falling back to insecure defaults.
 
+### BUG-017 — Hardcoded localhost API URL in frontend
+**Severity:** High (Bug)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `src/context/GravequitContext.jsx`
+- `src/pages/AdvisorDashboardPage.jsx`
+
+**Problem:**
+The frontend was using a hardcoded `const API_BASE = 'http://localhost:8000';`. This would cause the frontend to fail in production, as it would always attempt to communicate with localhost instead of the deployed backend server.
+
+**Fix:**
+Replaced the hardcoded string with `import.meta.env.VITE_API_BASE || 'http://localhost:8000'`. This allows the Vite build process to inject the correct production backend URL while preserving local development functionality.
+
 ---
 
 ## Open Bugs

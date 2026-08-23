@@ -5,7 +5,7 @@ import {
   VALID_REASON_TAGS 
 } from '../data/mockData';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const GravequitContext = createContext(null);
 
