@@ -121,6 +121,20 @@ Created an administrative endpoint (`POST /admin/retrain`) that fetches all hist
 
 > **Note for all devs:** If you need to share test fixtures, use seed scripts or JSON files instead of committing binary database files.
 
+### BUG-013 — `pipeline.py` crashes entire server if GROQ_API_KEY is missing
+**Severity:** Critical (Bug)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/pipeline.py`
+
+**Problem:**
+1. The `GROQ_API_KEY` validation at line 29 raised a `ValueError` at **module import time**. Since `pipeline.py` is imported by `patterns.py` which is imported by `main.py`, a missing Groq key would crash the **entire** FastAPI server on startup — including endpoints that don't use AI at all (`/items`, `/auth`, `/metrics`).
+2. The `ChatGroq` LLM was initialized with a redundant `os.environ.get("GROQ_API_KEY", "")` call instead of using the `GROQ_API_KEY` variable already fetched above it.
+
+**Fix:**
+1. Replaced the hard `ValueError` with a `warnings.warn()` so the server boots normally and only AI-dependent routes are affected.
+2. Changed the `ChatGroq` initialization to use the already-fetched `GROQ_API_KEY` variable (`api_key=GROQ_API_KEY or ""`).
+
 ---
 
 ## Open Bugs
