@@ -6,6 +6,7 @@ from typing import List, Dict, Any
 from database import get_db
 from models import User, Item, QuitReason
 from auth import get_current_user
+from auth_utils import verify_admin_key
 from stats import compute_stats
 from ai_summary import generate_pattern_summary
 
@@ -70,10 +71,9 @@ def preview_weekly_digest(
     digest = build_digest_content(user, user_items)
     return digest
 
-@router.post("/weekly-digest/send")
+@router.post("/weekly-digest/send", dependencies=[Depends(verify_admin_key)])
 def trigger_weekly_digest(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Triggers generation and queued delivery of weekly digests

@@ -214,6 +214,19 @@ The `/metrics/advisor` and `/metrics/internal` endpoints were completely unauthe
 **Fix:**
 Secured both routes in `metrics.py` by requiring standard JWT authentication (`Depends(get_current_user)`). Updated the `AdvisorDashboardPage` and `InternalMetricsPage` React components to fetch these endpoints using `getAuthHeaders()` from the auth context. While not strict role-based access control, this ensures that only logged-in users can view the data, fulfilling the security requirement without overly complicating the mock dashboard architecture.
 
+### BUG-020 — Any user can trigger mass email digest
+**Severity:** Medium (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/auth_utils.py`
+- `backend/routers/digest.py`
+
+**Problem:**
+The `POST /notifications/weekly-digest/send` endpoint was protected by `get_current_user`, meaning any logged-in student could hit this route to trigger the system-wide generation and queuing of the weekly AI digest emails. This could be abused to spam users, exhaust Groq API limits, and run up backend compute bills.
+
+**Fix:**
+Created a reusable `verify_admin_key` dependency in `auth_utils.py` that validates the `X-Admin-Api-Key` header. Swapped out `get_current_user` for `verify_admin_key` on the `/weekly-digest/send` endpoint. Now, only the system administrator (or a cron job with the correct API key) can trigger the mass email dispatch.
+
 ---
 
 ## Open Bugs
