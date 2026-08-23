@@ -294,6 +294,31 @@ The backend `requirements.txt` file listed packages without version pins. This m
 **Fix:**
 Pinned all dependencies in `requirements.txt` to their current stable versions to ensure deterministic builds.
 
+### BUG-026 — Unused backend imports
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/main.py`
+- `backend/routers/items.py`
+
+**Problem:**
+Leftover imports like `import os` in `main.py` and `from pydantic import BaseModel` in `items.py` were cluttering the backend codebase.
+
+**Fix:**
+Removed unused imports.
+
+### BUG-027 — Missing .dockerignore
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `.dockerignore`
+
+**Problem:**
+The project was missing a `.dockerignore` file, meaning any `docker build` would incorrectly upload the local `node_modules/`, `venv/`, and potentially sensitive `.env` files into the Docker context.
+
+**Fix:**
+Created `.dockerignore` in the project root with standard exclusions.
+
 ---
 
 ## Open Bugs
