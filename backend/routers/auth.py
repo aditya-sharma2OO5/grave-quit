@@ -12,12 +12,9 @@ from schemas import UserSignup, UserLogin, GoogleLoginRequest, AuthResponse, Use
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-from dotenv import load_dotenv
-
 @router.get("/config")
 def get_auth_config():
     """Return public auth config like Google Client ID to frontend."""
-    load_dotenv(override=True)
     client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip("'\" ")
     return {
         "google_client_id": client_id

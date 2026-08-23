@@ -227,6 +227,34 @@ The `POST /notifications/weekly-digest/send` endpoint was protected by `get_curr
 **Fix:**
 Created a reusable `verify_admin_key` dependency in `auth_utils.py` that validates the `X-Admin-Api-Key` header. Swapped out `get_current_user` for `verify_admin_key` on the `/weekly-digest/send` endpoint. Now, only the system administrator (or a cron job with the correct API key) can trigger the mass email dispatch.
 
+### BUG-021 — `load_dotenv()` called redundantly across modules
+**Severity:** Low (Performance)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/routers/auth.py`
+- `backend/pipeline.py`
+- `backend/database.py`
+- `backend/auth_utils.py`
+- `backend/ai_summary.py`
+
+**Problem:**
+Several modules were calling `load_dotenv()` at the module level or inside route handlers (e.g., `/auth/config` was calling `load_dotenv(override=True)` on *every single request*). This caused unnecessary disk I/O and redundant environment parsing.
+
+**Fix:**
+Removed all `load_dotenv()` calls from child modules. It is now only called once at the very top of `backend/main.py` when the server starts up, which is the standard FastAPI best practice.
+
+### BUG-022 — Rate limiter memory leak
+**Severity:** Low (Performance)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/main.py`
+
+**Problem:**
+The in-memory rate limiting dictionary `client_request_history` was tracking request timestamps per IP, but it never deleted the IP keys when users stopped making requests. Over a long uptime, this dictionary would grow indefinitely, slowly leaking memory.
+
+**Fix:**
+Added a periodic garbage collection block to the rate-limiter middleware. Every 5 minutes, it scans the dictionary and completely deletes keys for IP addresses that haven't made a request in the last 60 seconds.
+
 ---
 
 ## Open Bugs

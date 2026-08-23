@@ -47,9 +47,12 @@ app.add_middleware(
 
 # In-memory rate limiting map
 client_request_history = {}
+last_cleanup_time = time.time()
 
 @app.middleware("http")
 async def rate_limit_and_options_middleware(request: Request, call_next):
+    global last_cleanup_time
+    
     # Always let CORS preflight OPTIONS pass through immediately
     if request.method == "OPTIONS":
         return await call_next(request)
@@ -61,7 +64,14 @@ async def rate_limit_and_options_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
     now = time.time()
     
-    # Clean up timestamps older than 60 seconds
+    # Periodically clean up entirely dead IP keys to prevent memory leaks (every 5 minutes)
+    if now - last_cleanup_time > 300:
+        keys_to_delete = [ip for ip, ts in client_request_history.items() if not ts or (now - ts[-1] > 60)]
+        for ip in keys_to_delete:
+            del client_request_history[ip]
+        last_cleanup_time = now
+    
+    # Clean up timestamps older than 60 seconds for the current user
     timestamps = client_request_history.get(client_ip, [])
     timestamps = [t for t in timestamps if now - t < 60]
     

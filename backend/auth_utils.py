@@ -4,9 +4,6 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 import jwt
-from dotenv import load_dotenv
-
-load_dotenv()
 
 import warnings
 

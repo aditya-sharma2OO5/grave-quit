@@ -2,10 +2,6 @@ import os
 import re
 from groq import Groq
 from typing import Dict, List, Any
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
