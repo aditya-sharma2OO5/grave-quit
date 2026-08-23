@@ -149,6 +149,20 @@ Internal assignment briefs containing project requirements, grading rubrics, and
 **Fix:**
 Verified that the files are no longer tracked by git (`git ls-files` confirmed they are untracked). The existing `*.docx` rule in `.gitignore` will prevent them from being committed again.
 
+### BUG-015 — Hardcoded JWT fallback secret in source code
+**Severity:** High (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/auth_utils.py`
+- `backend/.env.example`
+
+**Problem:**
+`auth_utils.py` was using a hardcoded fallback `JWT_SECRET_KEY` in the source code if the environment variable wasn't set. Since this source code is committed to git, anyone could potentially use this fallback key to forge valid JWTs in production if the environment variable was missing. Additionally, `JWT_SECRET_KEY` was missing from `.env.example`, so developers might unknowingly rely on the fallback.
+
+**Fix:**
+1. Modified `auth_utils.py` to check for `JWT_SECRET_KEY`. If missing, it now generates an ephemeral, cryptographically secure random key (`secrets.token_hex(32)`) and raises a warning. Tokens signed with this key won't persist across server restarts, forcing developers to configure a proper key for production without exposing a static fallback.
+2. Added `JWT_SECRET_KEY` with a placeholder to `.env.example`.
+
 ---
 
 ## Open Bugs

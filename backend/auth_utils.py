@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "gravequit_dev_secret_key_2026_change_in_production")
+import warnings
+
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    SECRET_KEY = secrets.token_hex(32)
+    warnings.warn("JWT_SECRET_KEY is not set. Generated ephemeral key. Tokens will not persist across restarts.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 
