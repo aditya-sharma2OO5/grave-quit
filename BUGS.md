@@ -163,6 +163,18 @@ Verified that the files are no longer tracked by git (`git ls-files` confirmed t
 1. Modified `auth_utils.py` to check for `JWT_SECRET_KEY`. If missing, it now generates an ephemeral, cryptographically secure random key (`secrets.token_hex(32)`) and raises a warning. Tokens signed with this key won't persist across server restarts, forcing developers to configure a proper key for production without exposing a static fallback.
 2. Added `JWT_SECRET_KEY` with a placeholder to `.env.example`.
 
+### BUG-016 — Hardcoded fallback secrets in docker-compose.yml
+**Severity:** High (Security)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `docker-compose.yml`
+
+**Problem:**
+`docker-compose.yml` contained hardcoded fallback values for `ADMIN_API_KEY` and `JWT_SECRET_KEY`. Anyone cloning the repository and running `docker-compose up` without setting up a `.env` file would end up running the production-ready docker container with predictable, insecure plaintext secrets.
+
+**Fix:**
+Removed the fallback values and replaced them with the `:?` bash parameter expansion (`${ADMIN_API_KEY:?ADMIN_API_KEY is required}`). This ensures that Docker Compose will fail to start and print a clear error message if these critical secrets are missing, rather than silently falling back to insecure defaults.
+
 ---
 
 ## Open Bugs
