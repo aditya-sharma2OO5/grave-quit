@@ -78,23 +78,13 @@ export const GravequitProvider = ({ children }) => {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       
-      // Normalize API fields & fetch risk scores in parallel
-      const normalized = await Promise.all(data.map(async (item) => {
+      // Normalize API fields
+      const normalized = data.map((item) => {
         let riskScore = 20;
         let riskReason = 'Calculated from history';
-        if (item.status === 'active') {
-          try {
-            const rRes = await fetch(`${API_BASE}/items/${item.id}/risk`, {
-              headers: getAuthHeaders()
-            });
-            if (rRes.ok) {
-              const rData = await rRes.json();
-              riskScore = Math.round(rData.risk_percentage);
-              riskReason = rData.driving_factor;
-            }
-          } catch (e) {
-            console.error("Error fetching risk score:", e);
-          }
+        if (item.status === 'active' && item.risk_percentage !== undefined && item.risk_percentage !== null) {
+          riskScore = Math.round(item.risk_percentage);
+          riskReason = item.driving_factor || riskReason;
         }
         return {
           ...item,
@@ -111,8 +101,7 @@ export const GravequitProvider = ({ children }) => {
             ? Math.max(1, Math.ceil((new Date(item.ended_at) - new Date(item.started_at)) / (1000 * 60 * 60 * 24)))
             : null,
         };
-      }));
-
+      });
       setItems(normalized);
       setApiError(null);
     } catch (err) {

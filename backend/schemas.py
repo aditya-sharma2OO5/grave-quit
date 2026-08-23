@@ -84,6 +84,8 @@ class ItemResponse(BaseModel):
     started_at: datetime
     ended_at: Optional[datetime] = None
     quit_reason: Optional[QuitReasonDetail] = None
+    risk_percentage: Optional[float] = None
+    driving_factor: Optional[str] = None
 
     class Config:
         from_attributes = True

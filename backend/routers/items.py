@@ -43,6 +43,9 @@ def get_items(
         .all()
     )
     
+    user_total_quit = sum(1 for i in items if i.status == "quit")
+    user_total_completed = sum(1 for i in items if i.status == "completed")
+    
     response = []
     for item in items:
         quit_reason_data = None
@@ -53,6 +56,22 @@ def get_items(
                 "voice_transcript": item.reason.voice_transcript,
                 "created_at": item.reason.created_at
             }
+            
+        risk_pct = None
+        driving_factor = None
+        if item.status == "active":
+            started_at_naive = item.started_at.replace(tzinfo=None) if item.started_at.tzinfo else item.started_at
+            days_active = max(0, (datetime.now(timezone.utc).replace(tzinfo=None) - started_at_naive).days)
+            risk_pct = risk_model.predict_risk(days_active, user_total_quit, user_total_completed)
+            
+            driving_factor = "Recent drop-offs in your history"
+            if user_total_quit == 0:
+                driving_factor = "Item is new and you have a steady foundation"
+            elif days_active > 14 and user_total_quit > 0:
+                driving_factor = "Time elapsed matches your typical stall window"
+            elif days_active <= 7:
+                driving_factor = "Early commitment phase — initial momentum building"
+
         response.append({
             "id": item.id,
             "title": item.title,
@@ -61,7 +80,9 @@ def get_items(
             "note": item.note,
             "started_at": item.started_at,
             "ended_at": item.ended_at,
-            "quit_reason": quit_reason_data
+            "quit_reason": quit_reason_data,
+            "risk_percentage": risk_pct,
+            "driving_factor": driving_factor
         })
     return response
 

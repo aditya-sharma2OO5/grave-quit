@@ -255,6 +255,20 @@ The in-memory rate limiting dictionary `client_request_history` was tracking req
 **Fix:**
 Added a periodic garbage collection block to the rate-limiter middleware. Every 5 minutes, it scans the dictionary and completely deletes keys for IP addresses that haven't made a request in the last 60 seconds.
 
+### BUG-023 — N+1 API calls for risk scores on page load
+**Severity:** Low (Performance)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/schemas.py`
+- `backend/routers/items.py`
+- `src/context/GravequitContext.jsx`
+
+**Problem:**
+The frontend context `fetchItems()` function was looping over every item returned by `GET /items` and, for each active item, firing a separate `fetch` to `GET /items/{id}/risk` to get the risk score. For a user with 50 active items, this would fire 51 HTTP requests in parallel on page load, choking the browser network queue and hammering the backend.
+
+**Fix:**
+Calculated the risk score in bulk directly inside the `GET /items` backend endpoint and appended `risk_percentage` and `driving_factor` to the `ItemResponse` schema. Updated `GravequitContext.jsx` to map these directly from the initial items payload, entirely eliminating the N+1 API calls.
+
 ---
 
 ## Open Bugs
