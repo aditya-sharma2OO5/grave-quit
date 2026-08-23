@@ -282,6 +282,18 @@ The frontend still contained hardcoded mock objects like `INITIAL_ADVISOR_METRIC
 **Fix:**
 Deleted all unused mock data structures from `mockData.js`, retaining only `VALID_REASON_TAGS`. Removed the corresponding unused imports and context variables from `GravequitContext.jsx`.
 
+### BUG-025 — Unpinned backend dependencies
+**Severity:** Low (Polish)
+**Fixed:** 2026-08-23
+**Files affected:**
+- `backend/requirements.txt`
+
+**Problem:**
+The backend `requirements.txt` file listed packages without version pins. This meant that any future deployment or fresh install could pull breaking major version updates of critical libraries (like FastAPI, SQLAlchemy, or LangGraph), potentially breaking the application.
+
+**Fix:**
+Pinned all dependencies in `requirements.txt` to their current stable versions to ensure deterministic builds.
+
 ---
 
 ## Open Bugs
