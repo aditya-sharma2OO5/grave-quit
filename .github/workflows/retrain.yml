@@ -1,0 +1,30 @@
+name: Automated ML Retraining
+
+on:
+  schedule:
+    # Runs at 00:00 every Sunday (UTC)
+    # Customize this using crontab syntax if you prefer daily/monthly
+    - cron: '0 0 * * 0'
+  
+  # Allows you to trigger this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  retrain-model:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Retrain Endpoint
+        run: |
+          echo "Triggering ML Retraining on Production Backend..."
+          HTTP_STATUS=$(curl -s -w "%{http_code}" -o response.txt -X POST "${{ secrets.PROD_API_URL }}/admin/retrain" \
+            -H "X-Admin-Api-Key: ${{ secrets.ADMIN_API_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          cat response.txt
+          
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Retraining failed with HTTP status $HTTP_STATUS"
+            exit 1
+          fi
+          
+          echo "Retraining completed successfully!"
