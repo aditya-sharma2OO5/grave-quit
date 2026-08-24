@@ -94,6 +94,7 @@ class QuitRequest(BaseModel):
     reason_tag: str
     reason_text: Optional[str] = None
     voice_transcript: Optional[str] = None
+    ended_at: Optional[datetime] = None
 
 class QuitResponse(BaseModel):
     id: int

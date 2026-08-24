@@ -10,6 +10,17 @@ export const ItemDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { items, openQuitModal, recommitItem } = useGravequit();
+  const [isRecommitting, setIsRecommitting] = React.useState(false);
+
+  const handleRecommit = async (id) => {
+    setIsRecommitting(true);
+    const success = await recommitItem(id);
+    if (success) {
+      navigate('/items');
+    } else {
+      setIsRecommitting(false);
+    }
+  };
 
   const item = items.find(i => i.id === id) || items[0];
   const isActive = item?.status === 'active';
@@ -51,9 +62,9 @@ export const ItemDetailPage = () => {
                 Mark as Quit
               </Button>
             ) : (
-              <Button variant="accent" size="sm" onClick={() => recommitItem(item.id)}>
-                <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                <span>Re-Commit (Easier Version)</span>
+              <Button variant="accent" size="sm" onClick={() => handleRecommit(item.id)} disabled={isRecommitting}>
+                <RotateCcw className={`w-3.5 h-3.5 mr-1 ${isRecommitting ? 'animate-spin' : ''}`} />
+                <span>{isRecommitting ? 'Re-Committing...' : 'Re-Commit (Easier Version)'}</span>
               </Button>
             )}
           </div>
@@ -178,9 +189,9 @@ export const ItemDetailPage = () => {
                 <p className="text-xs text-[#8A8A8A] leading-relaxed">
                   Instead of abandoning this pursuit permanently, you can re-commit with 15-minute daily micro-milestones.
                 </p>
-                <Button variant="accent" size="sm" onClick={() => recommitItem(item.id)}>
-                  <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-                  <span>Start Modular 15-min Version Now</span>
+                <Button variant="accent" size="sm" onClick={() => handleRecommit(item.id)} disabled={isRecommitting}>
+                  <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isRecommitting ? 'animate-spin' : ''}`} />
+                  <span>{isRecommitting ? 'Starting...' : 'Start Modular 15-min Version Now'}</span>
                 </Button>
               </div>
             </Card>

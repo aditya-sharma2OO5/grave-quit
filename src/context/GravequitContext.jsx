@@ -74,6 +74,13 @@ export const GravequitProvider = ({ children }) => {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       
+      // Helper for DD-MM-YYYY formatting
+      const formatDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split('T')[0].split('-');
+        return `${day}-${month}-${year}`;
+      };
+
       // Normalize API fields
       const normalized = data.map((item) => {
         let riskScore = 20;
@@ -85,8 +92,8 @@ export const GravequitProvider = ({ children }) => {
         return {
           ...item,
           id: String(item.id),
-          started_at: item.started_at ? item.started_at.split('T')[0] : null,
-          ended_at: item.ended_at ? item.ended_at.split('T')[0] : null,
+          started_at: formatDate(item.started_at),
+          ended_at: formatDate(item.ended_at),
           riskScore,
           riskBadge: riskScore > 60 ? 'High Risk' : riskScore > 30 ? 'Moderate Risk' : 'Low Risk',
           riskReason,
@@ -223,12 +230,27 @@ export const GravequitProvider = ({ children }) => {
     const quitItems = items.filter(i => i.status === 'quit');
     const totalQuitEvents = quitItems.length;
 
+    const activeItems = items.filter(i => i.status === 'active');
+    const completedItems = items.filter(i => i.status === 'completed');
+    
+    let baseMomentum = 50;
+    baseMomentum += activeItems.length * 5;
+    baseMomentum += completedItems.length * 15;
+    
+    quitItems.forEach(i => {
+      const days = i.durationDays || 1;
+      if (days < 7) baseMomentum -= 5;
+      else if (days <= 14) baseMomentum -= 2;
+    });
+    
+    const calculatedMomentum = Math.max(10, Math.min(100, Math.round(baseMomentum)));
+
     if (totalQuitEvents === 0) {
       return {
         id: patternData?.id,
         averageDaysToQuit: 0,
         totalQuitEvents: 0,
-        momentumScore: 85,
+        momentumScore: calculatedMomentum,
         aiSummaryText: patternData?.ai_summary ?? "You haven't paused or let go of any items yet. As you observe your journeys, gentle pattern insights will form here.",
         tagBreakdown: VALID_REASON_TAGS.map(tag => ({ tag, count: 0, percentage: 0 })),
         clusters: patternData?.clusters,
@@ -266,7 +288,7 @@ export const GravequitProvider = ({ children }) => {
       id: patternData?.id,
       averageDaysToQuit,
       totalQuitEvents,
-      momentumScore: Math.min(95, 65 + totalQuitEvents * 2),
+      momentumScore: calculatedMomentum,
       aiSummaryText,
       tagBreakdown,
       clusters: patternData?.clusters,
@@ -327,7 +349,7 @@ export const GravequitProvider = ({ children }) => {
   };
 
   // ─── Submit quit event via real API ──────────────────────────────
-  const submitQuitEvent = async ({ itemId, reason_tag, reason_text, voice_transcript }) => {
+  const submitQuitEvent = async ({ itemId, reason_tag, reason_text, voice_transcript, ended_at }) => {
     const validTag = VALID_REASON_TAGS.includes(reason_tag) ? reason_tag : 'Other';
     try {
       const res = await fetch(`${API_BASE}/items/${itemId}/quit`, {
@@ -337,6 +359,7 @@ export const GravequitProvider = ({ children }) => {
           reason_tag: validTag,
           reason_text: reason_text || '',
           voice_transcript: voice_transcript || null,
+          ended_at: ended_at || null
         }),
       });
       if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -373,21 +396,37 @@ export const GravequitProvider = ({ children }) => {
   // ─── Recommit (Easier Version) ───────────────────────────────────
   const recommitItem = async (itemId) => {
     const sourceItem = items.find(i => i.id === itemId);
-    if (!sourceItem) return;
+    if (!sourceItem) return false;
+    
+    const newTitle = `${sourceItem.title} (Modular 15-min Version)`;
+    
+    // Check for duplicates
+    const alreadyExists = items.some(i => i.title === newTitle && i.status === 'active');
+    if (alreadyExists) {
+      alert("You have already recommitted this item.");
+      return false;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/items`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          title: `${sourceItem.title} (Modular 15-min Version)`,
+          title: newTitle,
           category: sourceItem.category,
           note: `Re-committed as an easier version of '${sourceItem.title}'.`
         }),
       });
       if (!res.ok) throw new Error(`API error: ${res.status}`);
+      
+      // Delete the old item to remove it from past observations
+      await deleteItem(itemId);
+      
       await fetchItems();
+      return true;
     } catch (err) {
       console.error('Failed to recommit item:', err);
+      return false;
     }
   };
 

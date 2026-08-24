@@ -124,7 +124,14 @@ def handle_quit(item_id: int, quit_in: QuitRequest, db: Session, user: User):
 
     now = datetime.now(timezone.utc)
     item.status = "quit"
-    item.ended_at = now
+    
+    if quit_in.ended_at:
+        if quit_in.ended_at.tzinfo is None:
+            item.ended_at = quit_in.ended_at.replace(tzinfo=timezone.utc)
+        else:
+            item.ended_at = quit_in.ended_at
+    else:
+        item.ended_at = now
 
     norm_tag = normalize_tag(quit_in.reason_tag)
 

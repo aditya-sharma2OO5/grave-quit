@@ -77,8 +77,31 @@ def get_advisor_metrics(db: Session = Depends(get_db)):
     # Format monthly trend list
     monthly_trend = list(monthly.values())[-6:]
 
-    # Avg momentum
-    avg_momentum = min(95, 65 + total_quit * 2) if total_quit > 0 else 74
+    # Calculate actual average student momentum based on real actions
+    users = db.query(User).all()
+    if not users:
+        avg_momentum = 50
+    else:
+        total_momentum = 0
+        for u in users:
+            u_active = db.query(func.count(Item.id)).filter(Item.user_id == u.id, Item.status == "active").scalar() or 0
+            u_completed = db.query(func.count(Item.id)).filter(Item.user_id == u.id, Item.status == "completed").scalar() or 0
+            u_quits = db.query(Item).filter(Item.user_id == u.id, Item.status == "quit").all()
+            
+            u_momentum = 50 + (u_active * 5) + (u_completed * 15)
+            for qi in u_quits:
+                duration_days = 1
+                if qi.started_at and qi.ended_at:
+                    delta = qi.ended_at - qi.started_at
+                    duration_days = max(1, delta.days)
+                if duration_days < 7:
+                    u_momentum -= 5
+                elif duration_days <= 14:
+                    u_momentum -= 2
+                    
+            total_momentum += max(10, min(100, u_momentum))
+            
+        avg_momentum = round(total_momentum / len(users))
 
     return {
         "activeStudents": max(total_users, 1),

@@ -9,6 +9,7 @@ import { TagPill } from '../components/TagPill';
 export const MyItemsPage = () => {
   const navigate = useNavigate();
   const { items, setIsAddItemModalOpen, openQuitModal, recommitItem, deleteItem, isAuthenticated, user } = useGravequit();
+  const [recommittingId, setRecommittingId] = React.useState(null);
 
   const activeItems = items.filter(i => i.status === 'active');
   const quitItems = items.filter(i => i.status === 'quit');
@@ -220,10 +221,15 @@ export const MyItemsPage = () => {
                     <Button
                       variant="accent"
                       size="sm"
-                      onClick={() => recommitItem(item.id)}
+                      onClick={async () => {
+                        setRecommittingId(item.id);
+                        await recommitItem(item.id);
+                        setRecommittingId(null);
+                      }}
+                      disabled={recommittingId === item.id}
                     >
-                      <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                      <span>Re-Commit (Easier)</span>
+                      <RotateCcw className={`w-3.5 h-3.5 mr-1 ${recommittingId === item.id ? 'animate-spin' : ''}`} />
+                      <span>{recommittingId === item.id ? 'Starting...' : 'Re-Commit (Easier)'}</span>
                     </Button>
                   </div>
                 </Card>

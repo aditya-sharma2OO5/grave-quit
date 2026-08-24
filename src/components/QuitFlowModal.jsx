@@ -12,6 +12,7 @@ export const QuitFlowModal = () => {
   const [reasonText, setReasonText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   if (!isQuitModalOpen || !activeQuitItem) return null;
 
@@ -35,7 +36,8 @@ export const QuitFlowModal = () => {
       itemId: activeQuitItem.id,
       reason_tag: selectedTag,
       reason_text: reasonText || voiceTranscript || 'Ended commitment intentionally.',
-      voice_transcript: voiceTranscript || null
+      voice_transcript: voiceTranscript || null,
+      ended_at: endDate
     });
 
     setReasonText('');
@@ -81,6 +83,21 @@ export const QuitFlowModal = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           
+          {/* End Date */}
+          <div>
+            <label className="block text-xs font-medium text-[#8A8A8A] mb-1.5 uppercase tracking-wider">
+              End Date
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] focus:border-[#A8C5B0] text-[#F5F5F0] text-sm rounded-lg px-3.5 py-2.5 outline-none transition-colors"
+              />
+            </div>
+          </div>
+
           {/* 5 Preset Tag Selector */}
           <div>
             <label className="block text-xs font-medium text-[#8A8A8A] mb-2 uppercase tracking-wider">
