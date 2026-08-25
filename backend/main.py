@@ -9,6 +9,7 @@ load_dotenv()
 
 from database import engine, Base
 from routers import patterns, items, admin, metrics, auth, digest
+from security_logger import security_logger
 
 from sqlalchemy import text
 
@@ -83,6 +84,7 @@ async def rate_limit_and_options_middleware(request: Request, call_next):
     timestamps = [t for t in timestamps if now - t < 60]
     
     if len(timestamps) >= 120:
+        security_logger.warning(f"Global rate limit exceeded (120 req/min) - IP: {client_ip}")
         return JSONResponse(
             status_code=429,
             content={"detail": "Too many requests. Please slow down and try again shortly."}

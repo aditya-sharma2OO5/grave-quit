@@ -10,6 +10,7 @@ from models import User
 from auth_utils import hash_password, verify_password, create_access_token
 from auth import get_current_user
 from schemas import UserSignup, UserLogin, GoogleLoginRequest, AuthResponse, UserResponse, UserSettingsUpdate
+from security_logger import security_logger
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -130,16 +131,20 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     }
 
 @router.post("/login", response_model=AuthResponse)
-def login(user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends(_check_login_rate_limit)):
+def login(request: Request, user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends(_check_login_rate_limit)):
     email_clean = user_data.email.strip().lower()
+    client_ip = request.client.host if request.client else "unknown"
+    
     user = db.query(User).filter(User.email == email_clean).first()
     
     if not user:
+        security_logger.warning(f"Failed login attempt (user not found) - Email: {email_clean}, IP: {client_ip}")
         raise HTTPException(status_code=401, detail="Incorrect email or password.")
         
     # Check if account is locked
     if user.locked_until and user.locked_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
         remaining = int((user.locked_until.replace(tzinfo=timezone.utc) - datetime.now(timezone.utc)).total_seconds() / 60)
+        security_logger.warning(f"Failed login attempt (account locked) - Email: {email_clean}, IP: {client_ip}")
         raise HTTPException(status_code=403, detail=f"Account temporarily locked due to multiple failed login attempts. Try again in {remaining} minutes.")
         
     # If user was created prior without password (legacy mock user), set their password on first login
@@ -151,6 +156,9 @@ def login(user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends
         user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
         if user.failed_login_attempts >= 5:
             user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+            security_logger.critical(f"Account locked due to brute force - Email: {email_clean}, IP: {client_ip}")
+        else:
+            security_logger.warning(f"Failed login attempt (invalid password) - Email: {email_clean}, IP: {client_ip}")
         db.commit()
         raise HTTPException(status_code=401, detail="Incorrect email or password.")
         
@@ -160,6 +168,7 @@ def login(user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends
         user.locked_until = None
         db.commit()
         
+    security_logger.info(f"User logged in successfully - Email: {email_clean}, IP: {client_ip}")
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return {
         "access_token": token,
@@ -186,12 +195,10 @@ def update_settings(
     db.refresh(current_user)
     return current_user
 
-@router.delete("/account")
-def delete_account(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Permanently delete student account and cascade-delete all data."""
+@router.delete("/account", status_code=204)
+def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    client_ip = request.client.host if request.client else "unknown"
+    security_logger.info(f"User account deleted - ID: {current_user.id}, Email: {current_user.email}, IP: {client_ip}")
     db.delete(current_user)
     db.commit()
     return {"message": "Account and all associated reflections permanently deleted."}

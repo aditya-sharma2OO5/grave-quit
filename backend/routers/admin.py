@@ -1,11 +1,12 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 from sqlalchemy.orm import Session
 import numpy as np
 
 from database import get_db
 from models import Item
 from ml_model import risk_model
+from security_logger import security_logger
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -13,6 +14,7 @@ ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "")
 
 @router.post("/retrain")
 def retrain_model(
+    request: Request,
     x_admin_api_key: str = Header(default=None, alias="X-Admin-Api-Key"),
     db: Session = Depends(get_db)
 ):
@@ -21,14 +23,18 @@ def retrain_model(
     resolved items (quit or completed) from the database.
     Optionally protected by X-Admin-Api-Key header if configured.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    
     if ADMIN_API_KEY and x_admin_api_key != ADMIN_API_KEY:
         # Check if the header was provided
         if not x_admin_api_key:
+            security_logger.warning(f"Unauthorized attempt to access admin retrain endpoint (missing key) - IP: {client_ip}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Admin API key required in 'X-Admin-Api-Key' header."
             )
         else:
+            security_logger.warning(f"Unauthorized attempt to access admin retrain endpoint (invalid key) - IP: {client_ip}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid Admin API key."
@@ -78,6 +84,7 @@ def retrain_model(
     
     if len(np.unique(y)) < 2:
         risk_model.train_on_synthetic_data()
+        security_logger.info(f"ML Model retrained successfully - Mode: regularized_prior, Records: {len(X)}")
         return {
             "status": "success",
             "message": f"Dataset contains only single class ({'quit' if y[0]==1 else 'completed'}). Retrained with regularized priors.",
@@ -87,6 +94,7 @@ def retrain_model(
         
     risk_model.train(X, y)
     
+    security_logger.info(f"ML Model retrained successfully - Mode: live_data, Records: {len(X)}")
     return {
         "status": "success",
         "message": f"Successfully retrained ML quit-risk model on {len(X)} real database records.",
