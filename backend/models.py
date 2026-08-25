@@ -11,6 +11,8 @@ class User(Base):
     email_opt_in = Column(Boolean, default=True)
     reminder_opt_in = Column(Boolean, default=False)
     role = Column(String, default="student")
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     items = relationship("Item", backref="user", cascade="all, delete-orphan")

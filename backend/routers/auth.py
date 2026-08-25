@@ -3,7 +3,7 @@ import time
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from database import get_db
 from models import User
@@ -137,13 +137,28 @@ def login(user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect email or password.")
         
+    # Check if account is locked
+    if user.locked_until and user.locked_until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+        remaining = int((user.locked_until.replace(tzinfo=timezone.utc) - datetime.now(timezone.utc)).total_seconds() / 60)
+        raise HTTPException(status_code=403, detail=f"Account temporarily locked due to multiple failed login attempts. Try again in {remaining} minutes.")
+        
     # If user was created prior without password (legacy mock user), set their password on first login
     if not user.hashed_password:
         user.hashed_password = hash_password(user_data.password)
         db.commit()
         db.refresh(user)
     elif not verify_password(user_data.password, user.hashed_password):
+        user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+        if user.failed_login_attempts >= 5:
+            user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=15)
+        db.commit()
         raise HTTPException(status_code=401, detail="Incorrect email or password.")
+        
+    # Successful login: reset counters
+    if user.failed_login_attempts > 0 or user.locked_until is not None:
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.commit()
         
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return {

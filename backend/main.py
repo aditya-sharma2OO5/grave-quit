@@ -21,6 +21,8 @@ try:
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS hashed_password VARCHAR;"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_opt_in BOOLEAN DEFAULT TRUE;"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reminder_opt_in BOOLEAN DEFAULT FALSE;"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER DEFAULT 0;"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP;"))
         conn.execute(text("ALTER TABLE items ADD COLUMN IF NOT EXISTS note TEXT;"))
         conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS clusters JSON;"))
         conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS similar_entries JSON;"))

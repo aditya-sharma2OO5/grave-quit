@@ -18,8 +18,9 @@
 **Context:** The application now uses strict Role-Based Access Control (RBAC). The "Advisor" and "Judge Metrics" tabs/endpoints are fully protected and hidden from normal users.
 **Action Required:** If you need access to the internal dashboards locally, open the `backend` folder and run `python manage_admins.py --promote <your-email>`.
 
-### [ ] Add `SECURITY.md` to `.gitignore` Before Making Repo Public
-**Context:** `SECURITY.md` documents internal security architecture and specific vulnerability details. It must be excluded from the public repository to avoid giving attackers a roadmap. Run: `echo "SECURITY.md" >> .gitignore` before the first public push.
+### [x] Remove `SECURITY.md` Before Making Repo Public
+**Context:** `SECURITY.md` documents internal security architecture and specific vulnerability details. 
+**Action Taken:** We executed a full `git filter-branch` to completely scrub this file from the entire git history and force-pushed to origin. It is no longer tracked by git.
 
 ---
 
