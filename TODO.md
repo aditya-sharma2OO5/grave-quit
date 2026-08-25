@@ -14,6 +14,10 @@
 ### [ ] Set `ADMIN_API_KEY` as Required in Production
 **Context:** Security audit item #16. The `/admin/retrain` endpoint silently allows unauthenticated access if `ADMIN_API_KEY` is not set in `.env`. In production, this variable **must** be configured. See `SECURITY.md` for the code-level fix.
 
+### [ ] Admin Roles for Developers (RBAC)
+**Context:** The application now uses strict Role-Based Access Control (RBAC). The "Advisor" and "Judge Metrics" tabs/endpoints are fully protected and hidden from normal users.
+**Action Required:** If you need access to the internal dashboards locally, open the `backend` folder and run `python manage_admins.py --promote <your-email>`.
+
 ### [ ] Add `SECURITY.md` to `.gitignore` Before Making Repo Public
 **Context:** `SECURITY.md` documents internal security architecture and specific vulnerability details. It must be excluded from the public repository to avoid giving attackers a roadmap. Run: `echo "SECURITY.md" >> .gitignore` before the first public push.
 

@@ -10,6 +10,7 @@ class User(Base):
     hashed_password = Column(String, nullable=True)
     email_opt_in = Column(Boolean, default=True)
     reminder_opt_in = Column(Boolean, default=False)
+    role = Column(String, default="student")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     items = relationship("Item", backref="user", cascade="all, delete-orphan")

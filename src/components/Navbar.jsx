@@ -5,13 +5,16 @@ import { useGravequit } from '../context/GravequitContext';
 
 export const Navbar = () => {
   const location = useLocation();
-  const { setIsAddItemModalOpen } = useGravequit();
+  const { setIsAddItemModalOpen, user } = useGravequit();
+  const isAdmin = user?.role === 'admin';
 
   const navLinks = [
     { path: '/items', label: 'My Items' },
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/advisor', label: 'Advisor' },
-    { path: '/internal-metrics', label: 'Judge Metrics' },
+    ...(isAdmin ? [
+      { path: '/advisor', label: 'Advisor' },
+      { path: '/internal-metrics', label: 'Judge Metrics' }
+    ] : []),
     { path: '/share', label: 'Share Card' },
     { path: '/about', label: 'Story' },
     { path: '/privacy', label: 'Privacy' }

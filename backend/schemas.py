@@ -19,6 +19,7 @@ class UserResponse(BaseModel):
     email: str
     email_opt_in: bool
     reminder_opt_in: bool
+    role: str
     created_at: datetime
 
     class Config:
