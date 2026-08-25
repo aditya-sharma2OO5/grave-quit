@@ -318,6 +318,45 @@ The project was missing a `.dockerignore` file, meaning any `docker build` would
 **Fix:**
 Created `.dockerignore` in the project root with standard exclusions.
 
+### BUG-028 — LLM Prompt Injection via User Reasons
+**Severity:** High (Security)
+**Fixed:** 2026-08-26
+**Files affected:**
+- `backend/pipeline.py`
+
+**Problem:**
+The AI pattern pipeline was directly interpolating user free-text into the Groq LLM prompt string, making the application highly susceptible to prompt injection attacks where a user could trick the model into leaking system instructions.
+
+**Fix:**
+Implemented a `sanitize_text` filter to truncate and escape user input. Re-wrote the system prompt to wrap user-generated strings in explicit `<user_input>` XML tags with strict parsing boundaries, separating data from instructions.
+
+### BUG-029 — Hardcoded 30-Day JWT Expiration
+**Severity:** High (Security)
+**Fixed:** 2026-08-26
+**Files affected:**
+- `backend/auth_utils.py`
+
+**Problem:**
+Stateless JWT tokens were hardcoded to last for 30 days. If an attacker hijacked a session token via XSS, they had a month-long window to exploit the compromised account.
+
+**Fix:**
+Removed the hardcoded duration. JWT expiration is now driven by `JWT_EXPIRE_MINUTES` in the `.env` file (defaulting to a secure 120 minutes), with a hardcoded ceiling clamp of 1440 minutes (24 hours) to prevent dangerous misconfigurations.
+
+### BUG-030 — Missing Security Audit Logs
+**Severity:** Medium (Security)
+**Fixed:** 2026-08-26
+**Files affected:**
+- `backend/security_logger.py`
+- `backend/main.py`
+- `backend/routers/auth.py`
+- `backend/routers/admin.py`
+
+**Problem:**
+The backend lacked any structured mechanism to log critical security events. Brute-force attacks, account lockouts, account deletions, and unauthorized access attempts to the `/admin/retrain` endpoint were failing silently without alerting administrators.
+
+**Fix:**
+Created a centralized `security_logger.py` configured to stream structured output to `stdout` for deployment ingestion (e.g., Vercel). Injected `INFO`, `WARNING`, and `CRITICAL` log events across the authentication, rate-limiting, and admin routing layers, capturing the target user and IP address.
+
 ---
 
 ## Open Bugs
