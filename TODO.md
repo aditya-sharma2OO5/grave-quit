@@ -8,6 +8,15 @@
 **Context:** Following the fixes for BUG-015 and BUG-016, all insecure fallback secrets have been removed from the codebase.
 **Action Required:** Copy `backend/.env.example` to `backend/.env` and populate `JWT_SECRET_KEY` and `ADMIN_API_KEY`. If you don't do this, `docker-compose up` will fail to start, and local development will use ephemeral JWT keys that don't persist across restarts.
 
+### [ ] CORS Whitelist — DO NOT USE `allow_origins=["*"]` in Production
+**Context:** Security audit item #14. The CORS middleware in `backend/main.py` currently allows all origins. Before deploying, replace `allow_origins=["*"]` with your actual frontend domain(s). See `SECURITY.md` for details once the fix is applied.
+
+### [ ] Set `ADMIN_API_KEY` as Required in Production
+**Context:** Security audit item #16. The `/admin/retrain` endpoint silently allows unauthenticated access if `ADMIN_API_KEY` is not set in `.env`. In production, this variable **must** be configured. See `SECURITY.md` for the code-level fix.
+
+### [ ] Add `SECURITY.md` to `.gitignore` Before Making Repo Public
+**Context:** `SECURITY.md` documents internal security architecture and specific vulnerability details. It must be excluded from the public repository to avoid giving attackers a roadmap. Run: `echo "SECURITY.md" >> .gitignore` before the first public push.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING
