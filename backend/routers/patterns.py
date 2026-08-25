@@ -56,6 +56,27 @@ def get_pattern_summary(db: Session = Depends(get_db), user: User = Depends(get_
             "generated_at": datetime.now(timezone.utc)
         }
 
+    # Security #10: Per-user AI generation cooldown (5 minutes)
+    # Prevents a single user from spamming the LLM API via rapid dashboard refreshes
+    AI_COOLDOWN_SECONDS = 300
+    latest_summary = db.query(PatternSummary).filter(
+        PatternSummary.user_id == user.id
+    ).order_by(PatternSummary.generated_at.desc()).first()
+
+    if latest_summary:
+        elapsed = (datetime.now(timezone.utc) - latest_summary.generated_at.replace(tzinfo=timezone.utc)).total_seconds()
+        if elapsed < AI_COOLDOWN_SECONDS:
+            # Return the most recent summary instead of generating a new one
+            return {
+                "id": latest_summary.id,
+                "stats": stats,
+                "ai_summary": latest_summary.ai_summary_text,
+                "clusters": latest_summary.clusters,
+                "similar_entries": latest_summary.similar_entries,
+                "risk_explanation": latest_summary.risk_explanation,
+                "generated_at": latest_summary.generated_at
+            }
+
     # Generate new summary if cache is invalid or missing
     all_reasons = [i.reason.reason_text for i in items if i.reason and i.reason.reason_text]
     latest_reason = all_reasons[-1] if all_reasons else ""

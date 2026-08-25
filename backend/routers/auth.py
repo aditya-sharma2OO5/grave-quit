@@ -1,6 +1,7 @@
 import os
+import time
 import requests
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 
@@ -11,6 +12,24 @@ from auth import get_current_user
 from schemas import UserSignup, UserLogin, GoogleLoginRequest, AuthResponse, UserResponse, UserSettingsUpdate
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Security #12: Per-IP login rate limiter (5 attempts per 60 seconds)
+_login_attempts: dict[str, list[float]] = {}
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 60
+
+def _check_login_rate_limit(request: Request):
+    """Raise 429 if this IP has exceeded login attempt limits."""
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    attempts = [t for t in _login_attempts.get(client_ip, []) if now - t < LOGIN_WINDOW_SECONDS]
+    if len(attempts) >= LOGIN_MAX_ATTEMPTS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many login attempts. Please wait {LOGIN_WINDOW_SECONDS} seconds before trying again."
+        )
+    attempts.append(now)
+    _login_attempts[client_ip] = attempts
 
 @router.get("/config")
 def get_auth_config():
@@ -111,7 +130,7 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     }
 
 @router.post("/login", response_model=AuthResponse)
-def login(user_data: UserLogin, db: Session = Depends(get_db)):
+def login(user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends(_check_login_rate_limit)):
     email_clean = user_data.email.strip().lower()
     user = db.query(User).filter(User.email == email_clean).first()
     

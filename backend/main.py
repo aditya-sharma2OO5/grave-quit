@@ -1,3 +1,4 @@
+import os
 import time
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,11 +35,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Robust CORS configuration supporting all dev ports (5173, 5174, 3000, etc.) & production
+# CORS: Explicit origin whitelist. Set ALLOWED_ORIGINS in .env for production.
+# Default allows common local dev ports only.
+_default_origins = "http://localhost:5173,http://localhost:5174,http://localhost:3000"
+ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get("ALLOWED_ORIGINS", _default_origins).split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_origin_regex=r"https?://.*",
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
