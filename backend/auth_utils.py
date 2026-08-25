@@ -14,7 +14,15 @@ if not SECRET_KEY:
     SECRET_KEY = secrets.token_hex(32)
     warnings.warn("JWT_SECRET_KEY is not set. Generated ephemeral key. Tokens will not persist across restarts.")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 30
+
+# Read JWT_EXPIRE_MINUTES, default to 120 (2 hours)
+try:
+    _expire_minutes = int(os.environ.get("JWT_EXPIRE_MINUTES", "120"))
+except ValueError:
+    _expire_minutes = 120
+    
+# Clamp to max 24 hours (1440 minutes)
+ACCESS_TOKEN_EXPIRE_MINUTES = min(_expire_minutes, 1440)
 
 ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "")
 
@@ -57,7 +65,7 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

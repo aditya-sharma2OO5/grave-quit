@@ -22,6 +22,10 @@
 **Context:** `SECURITY.md` documents internal security architecture and specific vulnerability details. 
 **Action Taken:** We executed a full `git filter-branch` to completely scrub this file from the entire git history and force-pushed to origin. It is no longer tracked by git.
 
+### [ ] Implement Refresh Token System (HttpOnly)
+**Context:** Because Gravequit does not currently use a complex "Refresh Token" system (where a short-lived 15-minute access token is constantly refreshed in the background using an HttpOnly cookie), the expiration time on this JWT dictates exactly how long a user can stay logged into the app before they are abruptly kicked out and forced to type their password again.
+**Action Required:** Implement a robust background refresh token rotation using strict `HttpOnly`, `Secure`, `SameSite=Strict` cookies to drastically improve both UX and security posture.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING
