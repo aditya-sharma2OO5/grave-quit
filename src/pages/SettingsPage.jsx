@@ -53,6 +53,19 @@ export const SettingsPage = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <ShieldAlert className="w-12 h-12 text-[#8A8A8A] mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-[#F5F5F0] mb-2">Authentication Required</h2>
+        <p className="text-[#8A8A8A] mb-6">Please sign in to view and manage your account settings.</p>
+        <Button variant="primary" onClick={() => navigate('/login')}>
+          Sign In
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -89,7 +102,7 @@ export const SettingsPage = () => {
               <div className="flex items-center gap-3 p-3 bg-[#131313] border border-[#2A2A2A] rounded-lg">
                 <Mail className="w-4 h-4 text-[#A8C5B0]" />
                 <span className="text-sm font-mono text-[#F5F5F0]">
-                  {user?.email || settings.userEmail || 'student.reflect@university.edu'}
+                  {user?.email || settings.userEmail || ''}
                 </span>
               </div>
             </div>

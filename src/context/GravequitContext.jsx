@@ -24,7 +24,7 @@ export const GravequitProvider = ({ children }) => {
   const [patternData, setPatternData] = useState(null);
   
   const [settings, setSettings] = useState({
-    userEmail: user?.email || 'student.reflect@university.edu',
+    userEmail: user?.email || '',
     weeklyDigest: user?.email_opt_in ?? true,
     reminderNudges: user?.reminder_opt_in ?? false,
     anonymizedAdvisorOptIn: true
