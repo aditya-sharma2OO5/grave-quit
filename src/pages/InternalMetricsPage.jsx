@@ -190,15 +190,20 @@ export const InternalMetricsPage = () => {
           <Card header="Daily Active Users Trend (DAU)">
             <div className="space-y-4">
               <div className="flex items-end justify-between gap-2 h-44 pt-4 px-2 border-b border-[#2A2A2A]">
-                {internalMetrics.dauTrend.map((d) => (
-                  <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
-                    <div 
-                      className="w-full max-w-[36px] bg-[#354F3E] hover:bg-[#A8C5B0] rounded-t-lg transition-all"
-                      style={{ height: `${Math.max(15, Math.min(100, d.dau * 20))}%` }}
-                    ></div>
-                    <span className="text-[10px] text-[#8A8A8A] font-mono">{d.day}</span>
-                  </div>
-                ))}
+                {internalMetrics.dauTrend.map((d, _, arr) => {
+                  const maxDau = Math.max(...arr.map(x => x.dau), 5); 
+                  const heightPct = Math.max(15, (d.dau / maxDau) * 85); // scaled to 85% to leave room for the label
+                  
+                  return (
+                    <div key={d.day} className="flex-1 h-full flex flex-col justify-end items-center gap-2">
+                      <div 
+                        className="w-full max-w-[36px] bg-[#354F3E] hover:bg-[#A8C5B0] rounded-t-lg transition-all"
+                        style={{ height: `${heightPct}%` }}
+                      ></div>
+                      <span className="text-[10px] text-[#8A8A8A] font-mono shrink-0">{d.day}</span>
+                    </div>
+                  );
+                })}
               </div>
               <p className="text-xs text-[#8A8A8A] text-center">Peak activity on Friday near assignment deadlines.</p>
             </div>

@@ -35,6 +35,9 @@ export const LandingPage = () => {
               <span>Start Your Journal</span>
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+            <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
+              Log In
+            </Button>
             <Button size="lg" variant="secondary" onClick={() => navigate('/about')}>
               Read Our Story
             </Button>

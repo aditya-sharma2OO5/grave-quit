@@ -24,7 +24,7 @@ export function App() {
     <GravequitProvider>
       <Router>
         <div className="flex flex-col min-h-screen bg-[#0A0A0A] text-[#F5F5F0] font-body selection:bg-[#A8C5B0] selection:text-[#0A0A0A]">
-          
+
           {/* Shared Header Navigation */}
           <Navbar />
 

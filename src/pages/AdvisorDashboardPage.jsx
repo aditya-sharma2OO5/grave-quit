@@ -88,9 +88,9 @@ export const AdvisorDashboardPage = () => {
           <Card header="Top Institutional Factor">
             <div className="flex items-baseline justify-between">
               <span className="text-lg font-bold font-headline text-[#F5F5F0]">
-                Too Busy (42%)
+                {advisorMetrics.topFactor}
               </span>
-              <span className="text-xs text-[#8A8A8A]">Exam Cycles</span>
+              <span className="text-xs text-[#8A8A8A]">Current Top Driver</span>
             </div>
           </Card>
         </div>
