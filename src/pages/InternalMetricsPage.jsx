@@ -195,7 +195,10 @@ export const InternalMetricsPage = () => {
                   const heightPct = Math.max(15, (d.dau / maxDau) * 85); // scaled to 85% to leave room for the label
                   
                   return (
-                    <div key={d.day} className="flex-1 h-full flex flex-col justify-end items-center gap-2">
+                    <div key={d.day} className="flex-1 h-full flex flex-col justify-end items-center gap-2 group relative">
+                      <div className="absolute -top-8 bg-[#1A1A1A] border border-[#2A2A2A] text-[#F5F5F0] text-[10px] font-mono px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        {d.dau} Users
+                      </div>
                       <div 
                         className="w-full max-w-[36px] bg-[#354F3E] hover:bg-[#A8C5B0] rounded-t-lg transition-all"
                         style={{ height: `${heightPct}%` }}
@@ -205,7 +208,6 @@ export const InternalMetricsPage = () => {
                   );
                 })}
               </div>
-              <p className="text-xs text-[#8A8A8A] text-center">Peak activity on Friday near assignment deadlines.</p>
             </div>
           </Card>
 
