@@ -51,6 +51,35 @@ export const InternalMetricsPage = () => {
   if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Loading metrics...</div>;
   if (!internalMetrics) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-[#8A8A8A]">Could not load metrics. Is the backend running?</div>;
 
+  let peakText = "";
+  if (internalMetrics.dauTrend && internalMetrics.dauTrend.length > 0) {
+    const maxDau = Math.max(...internalMetrics.dauTrend.map(d => d.dau));
+    const peakDays = internalMetrics.dauTrend.filter(d => d.dau === maxDau).map(d => d.day);
+    peakText = `Peak activity on ${peakDays.join(' and ')}.`;
+    
+    const tagCounts = {};
+    if (internalMetrics.recentActivity) {
+      internalMetrics.recentActivity.forEach(act => {
+        if (act.tag && act.tag !== "Other") {
+          tagCounts[act.tag] = (tagCounts[act.tag] || 0) + 1;
+        }
+      });
+    }
+    
+    let topTag = null;
+    let maxCount = 0;
+    for (const [tag, count] of Object.entries(tagCounts)) {
+      if (count > maxCount) {
+        topTag = tag;
+        maxCount = count;
+      }
+    }
+    
+    if (topTag) {
+      peakText += ` Driven primarily by ${topTag}.`;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] px-4 md:px-8 py-8 space-y-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -208,6 +237,7 @@ export const InternalMetricsPage = () => {
                   );
                 })}
               </div>
+              {peakText && <p className="text-xs text-[#8A8A8A] text-center mt-4">{peakText}</p>}
             </div>
           </Card>
 
