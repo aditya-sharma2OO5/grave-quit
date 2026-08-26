@@ -24,7 +24,10 @@
 
 ### [ ] Implement Refresh Token System (HttpOnly)
 **Context:** Because Gravequit does not currently use a complex "Refresh Token" system (where a short-lived 15-minute access token is constantly refreshed in the background using an HttpOnly cookie), the expiration time on this JWT dictates exactly how long a user can stay logged into the app before they are abruptly kicked out and forced to type their password again.
-**Action Required:** Implement a robust background refresh token rotation using strict `HttpOnly`, `Secure`, `SameSite=Strict` cookies to drastically improve both UX and security posture.
+**Action Required:**
+- Configure `axios` interceptors on frontend to automatically handle 401s and trigger token refresh flows gracefully without booting users abruptly.
+- Transition from LocalStorage to `HttpOnly` Secure cookies for all sensitive tokens (access + refresh) before production.
+- Use strict `HttpOnly`, `Secure`, `SameSite=Strict` cookies to drastically improve both UX and security posture.
 
 ---
 
