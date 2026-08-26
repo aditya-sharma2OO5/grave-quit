@@ -5,9 +5,11 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 import { VALID_REASON_TAGS } from '../data/mockData';
+import { useGravequit } from '../context/GravequitContext';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
+  const { user } = useGravequit();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F0]">
@@ -32,12 +34,14 @@ export const LandingPage = () => {
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" variant="primary" onClick={() => navigate('/items')}>
-              <span>Start Your Journal</span>
+              <span>{user ? 'Go to My Items' : 'Start Your Journal'}</span>
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-            <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
-              Log In
-            </Button>
+            {!user && (
+              <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
+                Log In
+              </Button>
+            )}
             <Button size="lg" variant="secondary" onClick={() => navigate('/about')}>
               Read Our Story
             </Button>
@@ -137,9 +141,15 @@ export const LandingPage = () => {
           </div>
 
           <div className="text-center pt-8">
-            <Button size="lg" variant="primary" onClick={() => navigate('/login')}>
-              Create Student Account
-            </Button>
+            {user ? (
+              <Button size="lg" variant="primary" onClick={() => navigate('/dashboard')}>
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button size="lg" variant="primary" onClick={() => navigate('/login')}>
+                Create Student Account
+              </Button>
+            )}
           </div>
 
           {/* Product Hunt Embed */}
