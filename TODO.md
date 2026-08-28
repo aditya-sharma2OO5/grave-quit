@@ -37,6 +37,10 @@
 **Context:** The risk prediction model needs to be continuously updated with fresh data.
 **Action Required:** Create a `.github/workflows/retrain.yml` cron job to automatically ping the `POST /admin/retrain` endpoint. **Crucial:** You must use GitHub Secrets for the `ADMIN_API_KEY` header and not hardcode any keys in the YAML file.
 
+### [ ] Transition Email Provider to Resend/SendGrid
+**Context:** For MVP, we are using a Gmail App Password (Option A) to send 6-digit verification codes. This doesn't scale well and has rate limits.
+**Action Required:** Transition the `backend/email_utils.py` to use a professional SMTP provider like Resend or SendGrid (Option B). This requires setting up DNS records on a custom domain (e.g., `noreply@gravequit.com`) and updating the `.env` variables accordingly.
+
 ---
 
 ## Frontend (Dev C) — PENDING
