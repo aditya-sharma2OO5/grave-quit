@@ -53,6 +53,10 @@
 **Context:** The Dockerfile hardcoded `--port 8000`. Cloud platforms like Railway and AWS AppRunner inject a dynamic `$PORT` — ignoring it causes health check failures and container restart loops.
 **Action Taken:** Changed `backend/Dockerfile` CMD to `uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}`, reading the platform port and falling back to 8000 locally.
 
+### [x] Clean Up Expired Verification Codes (Cloud Audit M4)
+**Context:** Expired verification codes were never cleaned up unless a new code was requested for the same email, leading to unbounded growth of the `verification_codes` table.
+**Action Taken:** Added a `cleanup_expired_codes` startup event in `backend/main.py` to delete all expired codes from the DB every time the application starts or redeploys.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

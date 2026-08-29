@@ -7,9 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from database import engine, Base
+from database import engine, Base, SessionLocal
 from routers import patterns, items, admin, metrics, auth, digest
 from security_logger import security_logger
+from models import VerificationCode
+from datetime import datetime, timezone
 
 from sqlalchemy import text
 
@@ -114,6 +116,20 @@ app.include_router(patterns.router)
 app.include_router(metrics.router)
 app.include_router(admin.router)
 app.include_router(digest.router)
+
+@app.on_event("startup")
+def cleanup_expired_codes():
+    """Startup task to delete expired verification codes so the database doesn't grow unbounded."""
+    try:
+        db = SessionLocal()
+        now = datetime.now(timezone.utc)
+        deleted = db.query(VerificationCode).filter(VerificationCode.expires_at < now).delete()
+        db.commit()
+        db.close()
+        if deleted > 0:
+            security_logger.info(f"Cleaned up {deleted} expired verification codes on startup.")
+    except Exception as e:
+        security_logger.error(f"Failed to clean up expired verification codes: {e}")
 
 @app.get("/")
 def root():
