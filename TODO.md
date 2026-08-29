@@ -49,6 +49,10 @@
 **Context:** The `POST /admin/retrain` endpoint silently allowed unauthenticated access if `ADMIN_API_KEY` was not configured in the environment, because the auth check was wrapped in `if ADMIN_API_KEY and ...`.
 **Action Taken:** Changed `backend/routers/admin.py` to a fail-closed pattern. If `ADMIN_API_KEY` is unset, the endpoint returns HTTP 503 and logs a CRITICAL event. The key comparison always executes when the key is configured.
 
+### [x] Use Dynamic Port in Dockerfile (Cloud Audit C3)
+**Context:** The Dockerfile hardcoded `--port 8000`. Cloud platforms like Railway and AWS AppRunner inject a dynamic `$PORT` — ignoring it causes health check failures and container restart loops.
+**Action Taken:** Changed `backend/Dockerfile` CMD to `uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}`, reading the platform port and falling back to 8000 locally.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING
