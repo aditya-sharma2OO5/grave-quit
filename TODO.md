@@ -33,6 +33,14 @@
 **Context:** When deployed behind a load balancer (Render, AWS, etc.), `request.client.host` returns the load balancer's IP instead of the real user. This caused the rate limiter to ban all users globally and rendered security logs useless for forensics.
 **Action Taken:** Replaced all `request.client.host` calls in `backend/main.py`, `backend/routers/auth.py`, and `backend/routers/admin.py` with `X-Forwarded-For` header extraction. The fix parses the standard reverse proxy header and falls back to direct connection for local development.
 
+### [x] Rate Limit Verification Code Endpoint (Cloud Audit H1)
+**Context:** The `POST /auth/send-verification-code` endpoint had no per-email cooldown, allowing an attacker to exhaust the Gmail quota and spam victims' inboxes.
+**Action Taken:** Added a 60-second per-email sliding window cooldown in `backend/routers/auth.py`. Repeat requests within the window are rejected with HTTP 429. Cooldown is only recorded after successful send.
+
+### [x] Use Cryptographically Secure RNG for Verification Codes (Cloud Audit H2)
+**Context:** Verification codes were generated using `random.choices()` (Mersenne Twister PRNG), which is predictable and not suitable for security tokens.
+**Action Taken:** Switched to `secrets.choice()` in `backend/routers/auth.py`, which uses the OS-level CSPRNG.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

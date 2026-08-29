@@ -13,6 +13,7 @@ from schemas import UserSignup, UserLogin, GoogleLoginRequest, AuthResponse, Use
 from security_logger import security_logger
 import random
 import string
+import secrets
 from email_utils import send_verification_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -21,6 +22,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 _login_attempts: dict[str, list[float]] = {}
 LOGIN_MAX_ATTEMPTS = 5
 LOGIN_WINDOW_SECONDS = 60
+
+# Security: Per-email verification code cooldown (1 code per 60 seconds per email)
+_verification_cooldown: dict[str, float] = {}
+VERIFICATION_COOLDOWN_SECONDS = 60
 
 def _check_login_rate_limit(request: Request):
     """Raise 429 if this IP has exceeded login attempt limits."""
@@ -106,13 +111,23 @@ def google_auth(google_req: GoogleLoginRequest, db: Session = Depends(get_db)):
 def send_verification_code(req: SendCodeRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
     
+    # Security: Per-email cooldown to prevent email spam abuse
+    now = time.time()
+    last_sent = _verification_cooldown.get(email_clean)
+    if last_sent and (now - last_sent) < VERIFICATION_COOLDOWN_SECONDS:
+        remaining = int(VERIFICATION_COOLDOWN_SECONDS - (now - last_sent))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Verification code already sent. Please wait {remaining} seconds before requesting another."
+        )
+    
     # Check if user already exists
     existing = db.query(User).filter(User.email == email_clean).first()
     if existing:
         raise HTTPException(status_code=400, detail="An account with this email already exists.")
         
-    # Generate 6 digit code
-    code = ''.join(random.choices(string.digits, k=6))
+    # Generate 6 digit code (cryptographically secure)
+    code = ''.join(secrets.choice(string.digits) for _ in range(6))
     
     # Store in DB, expiring in 10 minutes
     expires = datetime.now(timezone.utc) + timedelta(minutes=10)
@@ -132,6 +147,9 @@ def send_verification_code(req: SendCodeRequest, db: Session = Depends(get_db)):
     success = send_verification_email(email_clean, code)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send verification email. Please try again.")
+    
+    # Record cooldown AFTER successful send
+    _verification_cooldown[email_clean] = time.time()
         
     return {"message": "Verification code sent."}
 
