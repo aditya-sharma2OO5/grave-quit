@@ -24,7 +24,8 @@ LOGIN_WINDOW_SECONDS = 60
 
 def _check_login_rate_limit(request: Request):
     """Raise 429 if this IP has exceeded login attempt limits."""
-    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     now = time.time()
     attempts = [t for t in _login_attempts.get(client_ip, []) if now - t < LOGIN_WINDOW_SECONDS]
     if len(attempts) >= LOGIN_MAX_ATTEMPTS:
@@ -179,7 +180,8 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
 @router.post("/login", response_model=AuthResponse)
 def login(request: Request, user_data: UserLogin, db: Session = Depends(get_db), _: None = Depends(_check_login_rate_limit)):
     email_clean = user_data.email.strip().lower()
-    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     
     user = db.query(User).filter(User.email == email_clean).first()
     
@@ -243,7 +245,8 @@ def update_settings(
 
 @router.delete("/account", status_code=204)
 def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     security_logger.info(f"User account deleted - ID: {current_user.id}, Email: {current_user.email}, IP: {client_ip}")
     db.delete(current_user)
     db.commit()

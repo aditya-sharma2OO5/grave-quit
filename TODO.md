@@ -29,6 +29,10 @@
 - Transition from LocalStorage to `HttpOnly` Secure cookies for all sensitive tokens (access + refresh) before production.
 - Use strict `HttpOnly`, `Secure`, `SameSite=Strict` cookies to drastically improve both UX and security posture.
 
+### [x] Fix Reverse Proxy IP Extraction (BUG-031 — "Global Ban Bug")
+**Context:** When deployed behind a load balancer (Render, AWS, etc.), `request.client.host` returns the load balancer's IP instead of the real user. This caused the rate limiter to ban all users globally and rendered security logs useless for forensics.
+**Action Taken:** Replaced all `request.client.host` calls in `backend/main.py`, `backend/routers/auth.py`, and `backend/routers/admin.py` with `X-Forwarded-For` header extraction. The fix parses the standard reverse proxy header and falls back to direct connection for local development.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

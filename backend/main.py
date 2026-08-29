@@ -70,7 +70,9 @@ async def rate_limit_and_options_middleware(request: Request, call_next):
     if request.url.path in ["/", "/docs", "/openapi.json", "/redoc"]:
         return await call_next(request)
         
-    client_ip = request.client.host if request.client else "unknown"
+    # Extract real client IP behind reverse proxy (Render/AWS/etc)
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     now = time.time()
     
     # Periodically clean up entirely dead IP keys to prevent memory leaks (every 5 minutes)

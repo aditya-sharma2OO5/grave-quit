@@ -356,7 +356,6 @@ The backend lacked any structured mechanism to log critical security events. Bru
 
 **Fix:**
 Created a centralized `security_logger.py` configured to stream structured output to `stdout` for deployment ingestion (e.g., Vercel). Injected `INFO`, `WARNING`, and `CRITICAL` log events across the authentication, rate-limiting, and admin routing layers, capturing the target user and IP address.
-
 ---
 
 ## Open Bugs

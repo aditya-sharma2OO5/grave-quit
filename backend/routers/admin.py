@@ -23,7 +23,8 @@ def retrain_model(
     resolved items (quit or completed) from the database.
     Optionally protected by X-Admin-Api-Key header if configured.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     
     if ADMIN_API_KEY and x_admin_api_key != ADMIN_API_KEY:
         # Check if the header was provided
