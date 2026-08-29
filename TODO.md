@@ -45,6 +45,10 @@
 **Context:** `render.yaml` and `docker-compose.yml` set `CORS_ORIGINS`, but `main.py` reads `ALLOWED_ORIGINS`. The backend never received the value and silently fell back to localhost origins. Render also had a wildcard `"*"` which is insecure.
 **Action Taken:** Renamed the variable to `ALLOWED_ORIGINS` in both `render.yaml` and `docker-compose.yml`. Set the Render value to the actual production frontend domain (`https://grave-quit.vercel.app`).
 
+### [x] Fail-Close Admin Endpoint When API Key Unset (Cloud Audit H3)
+**Context:** The `POST /admin/retrain` endpoint silently allowed unauthenticated access if `ADMIN_API_KEY` was not configured in the environment, because the auth check was wrapped in `if ADMIN_API_KEY and ...`.
+**Action Taken:** Changed `backend/routers/admin.py` to a fail-closed pattern. If `ADMIN_API_KEY` is unset, the endpoint returns HTTP 503 and logs a CRITICAL event. The key comparison always executes when the key is configured.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

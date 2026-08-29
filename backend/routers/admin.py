@@ -26,7 +26,15 @@ def retrain_model(
     forwarded = request.headers.get("x-forwarded-for", "")
     client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     
-    if ADMIN_API_KEY and x_admin_api_key != ADMIN_API_KEY:
+    if not ADMIN_API_KEY:
+        # Fail-closed: if the key is not configured, block all access
+        security_logger.critical(f"Admin retrain endpoint accessed but ADMIN_API_KEY is not configured - IP: {client_ip}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Admin endpoint is not configured. Set ADMIN_API_KEY in environment."
+        )
+
+    if x_admin_api_key != ADMIN_API_KEY:
         # Check if the header was provided
         if not x_admin_api_key:
             security_logger.warning(f"Unauthorized attempt to access admin retrain endpoint (missing key) - IP: {client_ip}")
