@@ -28,6 +28,7 @@ try:
         conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS clusters JSON;"))
         conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS similar_entries JSON;"))
         conn.execute(text("ALTER TABLE pattern_summaries ADD COLUMN IF NOT EXISTS risk_explanation TEXT;"))
+        conn.execute(text("ALTER TABLE verification_codes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP;"))
         conn.commit()
 except Exception as e:
     print(f"[Startup Warning] Schema column sync notice: {e}")
