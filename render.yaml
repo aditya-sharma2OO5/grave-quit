@@ -14,8 +14,8 @@ services:
         sync: false
       - key: JWT_SECRET_KEY
         generateValue: true
-      - key: CORS_ORIGINS
-        value: "*"
+      - key: ALLOWED_ORIGINS
+        value: "https://grave-quit.vercel.app"
 
   - type: web
     name: gravequit-frontend

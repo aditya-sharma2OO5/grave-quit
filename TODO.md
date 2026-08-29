@@ -41,6 +41,10 @@
 **Context:** Verification codes were generated using `random.choices()` (Mersenne Twister PRNG), which is predictable and not suitable for security tokens.
 **Action Taken:** Switched to `secrets.choice()` in `backend/routers/auth.py`, which uses the OS-level CSPRNG.
 
+### [x] Fix CORS Environment Variable Name Mismatch (Cloud Audit C2)
+**Context:** `render.yaml` and `docker-compose.yml` set `CORS_ORIGINS`, but `main.py` reads `ALLOWED_ORIGINS`. The backend never received the value and silently fell back to localhost origins. Render also had a wildcard `"*"` which is insecure.
+**Action Taken:** Renamed the variable to `ALLOWED_ORIGINS` in both `render.yaml` and `docker-compose.yml`. Set the Render value to the actual production frontend domain (`https://grave-quit.vercel.app`).
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING
