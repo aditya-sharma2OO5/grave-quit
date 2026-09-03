@@ -57,6 +57,10 @@
 **Context:** Expired verification codes were never cleaned up unless a new code was requested for the same email, leading to unbounded growth of the `verification_codes` table.
 **Action Taken:** Added a `cleanup_expired_codes` startup event in `backend/main.py` to delete all expired codes from the DB every time the application starts or redeploys.
 
+### [x] Restrict Postgres Port Mapping (Cloud Audit M3)
+**Context:** `docker-compose.yml` exposed the Postgres container port directly to the host machine (`5432:5432`). On cloud VMs, this could expose the database to the internet.
+**Action Taken:** Restricted the port mapping to localhost (`127.0.0.1:5432:5432`) so the database is only accessible from the host itself and Docker internal networks.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING
