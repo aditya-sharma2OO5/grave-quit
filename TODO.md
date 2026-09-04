@@ -61,6 +61,10 @@
 **Context:** `docker-compose.yml` exposed the Postgres container port directly to the host machine (`5432:5432`). On cloud VMs, this could expose the database to the internet.
 **Action Taken:** Restricted the port mapping to localhost (`127.0.0.1:5432:5432`) so the database is only accessible from the host itself and Docker internal networks.
 
+### [x] Configure Frontend VITE_API_BASE for Production (Cloud Audit M1)
+**Context:** The frontend `VITE_API_BASE` defaulted to localhost, causing the production build to fail to route API requests correctly when built via `render.yaml`.
+**Action Taken:** Injected `VITE_API_BASE` into the `render.yaml` frontend service configuration and documented this requirement in a new `.env.example` file in the frontend root.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

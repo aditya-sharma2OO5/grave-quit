@@ -23,6 +23,9 @@ services:
     rootDir: .
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE
+        value: "https://gravequit-backend.onrender.com" # Replace with actual Render backend URL
     routes:
       - type: rewrite
         source: /*
