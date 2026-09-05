@@ -14,3 +14,4 @@ langchain-groq
 pyjwt==2.8.0
 requests==2.34.2
 email-validator
+redis==5.0.4

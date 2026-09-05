@@ -15,31 +15,29 @@ import random
 import string
 import secrets
 from email_utils import send_verification_email
+from redis_client import check_rate_limit, check_cooldown, set_cooldown
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Security #12: Per-IP login rate limiter (5 attempts per 60 seconds)
-_login_attempts: dict[str, list[float]] = {}
 LOGIN_MAX_ATTEMPTS = 5
 LOGIN_WINDOW_SECONDS = 60
 
 # Security: Per-email verification code cooldown (1 code per 60 seconds per email)
-_verification_cooldown: dict[str, float] = {}
 VERIFICATION_COOLDOWN_SECONDS = 60
 
 def _check_login_rate_limit(request: Request):
     """Raise 429 if this IP has exceeded login attempt limits."""
     forwarded = request.headers.get("x-forwarded-for", "")
     client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
-    now = time.time()
-    attempts = [t for t in _login_attempts.get(client_ip, []) if now - t < LOGIN_WINDOW_SECONDS]
-    if len(attempts) >= LOGIN_MAX_ATTEMPTS:
+    
+    is_allowed = check_rate_limit(f"login_rate_limit:{client_ip}", LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS)
+    
+    if not is_allowed:
         raise HTTPException(
             status_code=429,
             detail=f"Too many login attempts. Please wait {LOGIN_WINDOW_SECONDS} seconds before trying again."
         )
-    attempts.append(now)
-    _login_attempts[client_ip] = attempts
 
 @router.get("/config")
 def get_auth_config():
@@ -112,10 +110,9 @@ def send_verification_code(req: SendCodeRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
     
     # Security: Per-email cooldown to prevent email spam abuse
-    now = time.time()
-    last_sent = _verification_cooldown.get(email_clean)
-    if last_sent and (now - last_sent) < VERIFICATION_COOLDOWN_SECONDS:
-        remaining = int(VERIFICATION_COOLDOWN_SECONDS - (now - last_sent))
+    is_allowed, remaining = check_cooldown(f"email_cooldown:{email_clean}", VERIFICATION_COOLDOWN_SECONDS)
+    
+    if not is_allowed:
         raise HTTPException(
             status_code=429,
             detail=f"Verification code already sent. Please wait {remaining} seconds before requesting another."
@@ -149,7 +146,7 @@ def send_verification_code(req: SendCodeRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Failed to send verification email. Please try again.")
     
     # Record cooldown AFTER successful send
-    _verification_cooldown[email_clean] = time.time()
+    set_cooldown(f"email_cooldown:{email_clean}", VERIFICATION_COOLDOWN_SECONDS)
         
     return {"message": "Verification code sent."}
 

@@ -13,8 +13,10 @@ services:
       - ADMIN_API_KEY=${ADMIN_API_KEY:?ADMIN_API_KEY is required}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:80
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
     depends_on:
       - db
+      - redis
     restart: unless-stopped
 
   frontend:
@@ -41,3 +43,12 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped

@@ -65,6 +65,18 @@
 **Context:** The frontend `VITE_API_BASE` defaulted to localhost, causing the production build to fail to route API requests correctly when built via `render.yaml`.
 **Action Taken:** Injected `VITE_API_BASE` into the `render.yaml` frontend service configuration and documented this requirement in a new `.env.example` file in the frontend root.
 
+### [x] Migrate Rate Limiting State to Redis (Cloud Audit M2)
+**Context:** Global rate limits, login attempt limits, and email verification cooldowns were stored in memory and wiped on every cloud redeploy.
+**Action Taken:** Added a Redis service to `docker-compose.yml`, required `redis` in `requirements.txt`, created a `redis_client.py` manager, and replaced all in-memory dictionaries with fast Redis operations using sliding windows. Built with a safe fallback to memory if Redis is unavailable.
+
+---
+
+## Backend (Dev A) — PENDING
+
+### [ ] Provision Redis on Render
+**Context:** To fix the in-memory rate limiting reset issue (Cloud Audit M2), the rate limiter has been migrated to Redis.
+**Action Required:** Create a free Redis instance in the Render dashboard and add its internal URL as the `REDIS_URL` environment variable to the backend service. Otherwise, the app will gracefully fall back to the insecure in-memory dictionaries.
+
 ---
 
 ## DevOps / AI/ML (Dev B) — PENDING

@@ -16,6 +16,8 @@ services:
         generateValue: true
       - key: ALLOWED_ORIGINS
         value: "https://grave-quit.vercel.app"
+      - key: REDIS_URL
+        sync: false
 
   - type: web
     name: gravequit-frontend
