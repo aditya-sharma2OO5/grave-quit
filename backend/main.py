@@ -35,10 +35,13 @@ try:
 except Exception as e:
     print(f"[Startup Warning] Schema column sync notice: {e}")
 
+is_prod = os.environ.get("ENVIRONMENT") == "production" or os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT")
 app = FastAPI(
     title="Gravequit API",
     description="A digital sanctuary for students to observe and retire commitments with clarity and zero guilt.",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url=None if is_prod else "/docs",
+    redoc_url=None if is_prod else "/redoc"
 )
 
 # CORS: Explicit origin whitelist. Set ALLOWED_ORIGINS in .env for production.

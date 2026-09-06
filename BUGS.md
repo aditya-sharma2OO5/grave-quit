@@ -356,8 +356,176 @@ The backend lacked any structured mechanism to log critical security events. Bru
 
 **Fix:**
 Created a centralized `security_logger.py` configured to stream structured output to `stdout` for deployment ingestion (e.g., Vercel). Injected `INFO`, `WARNING`, and `CRITICAL` log events across the authentication, rate-limiting, and admin routing layers, capturing the target user and IP address.
+### BUG-031 — Global ban bug from reverse proxy IP extraction (Cloud Audit C1)
+**Severity:** Critical (Security)
+**Fixed:** 2026-08-29
+**Files affected:**
+- `backend/main.py`
+- `backend/routers/auth.py`
+- `backend/routers/admin.py`
+
+**Problem:**
+When deployed behind a load balancer (Render, AWS, etc.), `request.client.host` returns the load balancer's IP instead of the real user. This caused the rate limiter to ban all users globally after a single user exceeded the limit, and rendered security logs useless for forensics.
+
+**Fix:**
+1. Replaced all `request.client.host` calls with `X-Forwarded-For` header extraction across all three files.
+2. Parses the first IP in the comma-separated chain and falls back to `request.client.host` for local development.
+
+---
+
+### BUG-032 — Verification code endpoint has no rate limit (Cloud Audit H1)
+**Severity:** High (Security)
+**Fixed:** 2026-08-29
+**Files affected:**
+- `backend/routers/auth.py`
+
+**Problem:**
+The `POST /auth/send-verification-code` endpoint had no per-email cooldown, allowing an attacker to exhaust the Gmail SMTP quota by spamming requests and flood victims' inboxes.
+
+**Fix:**
+1. Added a 60-second per-email sliding window cooldown.
+2. Repeat requests within the window return HTTP 429.
+3. Cooldown is only recorded after a successful email send.
+
+---
+
+### BUG-033 — Verification codes use insecure PRNG (Cloud Audit H2)
+**Severity:** High (Security)
+**Fixed:** 2026-08-29
+**Files affected:**
+- `backend/routers/auth.py`
+
+**Problem:**
+Verification codes were generated using `random.choices()` (Mersenne Twister PRNG), which is predictable and not suitable for security tokens. An attacker who observed enough codes could predict future ones.
+
+**Fix:**
+1. Replaced `random.choices()` with `secrets.choice()`, which uses the OS-level CSPRNG.
+
+---
+
+### BUG-034 — CORS environment variable name mismatch (Cloud Audit C2)
+**Severity:** Critical (Config)
+**Fixed:** 2026-08-29
+**Files affected:**
+- `render.yaml`
+- `docker-compose.yml`
+
+**Problem:**
+`render.yaml` and `docker-compose.yml` set `CORS_ORIGINS`, but `main.py` reads `ALLOWED_ORIGINS`. The backend never received the configured value and silently fell back to localhost origins. Render also had a wildcard `"*"` which is insecure.
+
+**Fix:**
+1. Renamed the variable to `ALLOWED_ORIGINS` in both deployment configs.
+2. Set the Render value to the actual production frontend domain (`https://grave-quit.vercel.app`).
+
+---
+
+### BUG-035 — Admin retrain endpoint open if API key unset (Cloud Audit H3)
+**Severity:** High (Security)
+**Fixed:** 2026-08-29
+**Files affected:**
+- `backend/routers/admin.py`
+
+**Problem:**
+The `POST /admin/retrain` endpoint used `if ADMIN_API_KEY and ...` to gate access. If `ADMIN_API_KEY` was empty, the entire auth check was skipped, allowing unauthenticated ML model retraining.
+
+**Fix:**
+1. Changed to a fail-closed pattern: if `ADMIN_API_KEY` is not configured, the endpoint returns HTTP 503 and logs a CRITICAL security event.
+2. The key comparison always executes when the key is set.
+
+---
+
+### BUG-036 — Dockerfile hardcodes port 8000 (Cloud Audit C3)
+**Severity:** Critical (Infrastructure)
+**Fixed:** 2026-08-30
+**Files affected:**
+- `backend/Dockerfile`
+
+**Problem:**
+The Dockerfile CMD hardcoded `--port 8000`. Cloud platforms like Railway and AWS AppRunner inject a dynamic `$PORT` — ignoring it causes health check failures and container restart loops.
+
+**Fix:**
+1. Changed CMD to `sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"` to read the platform-injected port and fall back to 8000 for local Docker.
+
+---
+
+### BUG-037 — Expired verification codes never cleaned up (Cloud Audit M4)
+**Severity:** Medium (Database)
+**Fixed:** 2026-08-30
+**Files affected:**
+- `backend/main.py`
+
+**Problem:**
+Expired verification codes were only deleted when a new code was requested for the same email. If someone requested a code and never signed up, that row stayed in the `verification_codes` table forever, causing unbounded growth.
+
+**Fix:**
+1. Added a `cleanup_expired_codes()` startup event to delete all expired codes from the database every time the application starts or redeploys.
+
+---
+
+### BUG-038 — Docker-compose exposes Postgres to host network (Cloud Audit M3)
+**Severity:** Medium (Security)
+**Fixed:** 2026-09-03
+**Files affected:**
+- `docker-compose.yml`
+
+**Problem:**
+The Postgres container mapped its port to the host machine (`5432:5432`). On cloud VMs with a public IP, the database would be exposed to the internet with default credentials.
+
+**Fix:**
+1. Restricted the mapping to `127.0.0.1:5432:5432` so the database is only accessible from localhost and Docker internal networks.
+
+---
+
+### BUG-039 — Frontend VITE_API_BASE not configured for production (Cloud Audit M1)
+**Severity:** Medium (Config)
+**Fixed:** 2026-09-03
+**Files affected:**
+- `render.yaml`
+- `.env.example` (new)
+
+**Problem:**
+The frontend's `VITE_API_BASE` was missing from the deployment configuration, causing the production build on Render to fall back to `http://localhost:8000`.
+
+**Fix:**
+1. Injected `VITE_API_BASE` as an environment variable in `render.yaml`.
+2. Created an `.env.example` file in the frontend root to document this requirement.
+
+---
+
+### BUG-040 — In-memory rate limiting resets on every deploy (Cloud Audit M2)
+**Severity:** Medium (Security)
+**Fixed:** 2026-09-05
+**Files affected:**
+- `backend/redis_client.py` (new)
+- `backend/main.py`
+- `backend/routers/auth.py`
+- `docker-compose.yml`
+- `render.yaml`
+- `backend/requirements.txt`
+
+**Problem:**
+The global 120 req/min rate limit, login attempt limits, and email verification cooldowns were stored in Python dictionaries. On Render, these are wiped on every deploy or cold start, effectively resetting all rate limits for attackers.
+
+**Fix:**
+1. Added a Redis service to `docker-compose.yml` and `redis` to `requirements.txt`.
+2. Created `redis_client.py` with sliding window rate limit and cooldown implementations using Redis pipelines for atomicity.
+3. Replaced all in-memory dictionaries in `main.py` and `auth.py` with the Redis helpers.
+4. Built a graceful fallback to in-memory dictionaries if Redis is unavailable.
+
+### BUG-041 — Swagger docs publicly accessible in production (Cloud Audit L1)
+**Severity:** Low (Security)
+**Fixed:** 2026-09-06
+**Files affected:**
+- `backend/main.py`
+
+**Problem:**
+The FastAPI application was initializing with Swagger (`/docs`) and ReDoc (`/redoc`) exposed by default. In a production environment, this exposes the API schema, endpoints, and data models to attackers, enabling them to discover internal or undocumented endpoints easily.
+
+**Fix:**
+1. Modified `backend/main.py` to conditionally set `docs_url=None` and `redoc_url=None` when `ENVIRONMENT=production`, `RENDER`, or `RAILWAY_ENVIRONMENT` environment variables indicate a production build.
+
 ---
 
 ## Open Bugs
 
-See the active items in code_review.md and code_audit_round2.md (artifacts directory).
+See the active items in code_review.md, code_audit_round2.md, and code_audit_round3.md (artifacts directory).
