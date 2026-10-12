@@ -46,6 +46,7 @@ export default {
       fontFamily: {
         headline: ['Manrope', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        cinzel: ['Cinzel', 'serif'],
       },
       borderRadius: {
         'card': '14px',
@@ -60,7 +61,7 @@ export default {
         'ghost-drift': 'ghost-drift 8s ease-in-out infinite',
         'fog-scroll': 'fog-scroll 20s ease-in-out infinite',
         'candle-flicker': 'candle-flicker 2s ease-in-out infinite',
-        'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+        'fade-in-up': 'fade-in-up 1.2s ease-out forwards',
       },
       keyframes: {
         'gravestone-float': {

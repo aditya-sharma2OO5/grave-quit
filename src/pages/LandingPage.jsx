@@ -1,62 +1,137 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Feather, Clock, Shield, Sparkles, ArrowRight, CheckCircle2, BarChart2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Clock, Shield, Sparkles, ArrowRight, CheckCircle2, BarChart2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { TagPill } from '../components/TagPill';
 import { VALID_REASON_TAGS } from '../data/mockData';
 import { useGravequit } from '../context/GravequitContext';
+import MemorialShrine from '../components/MemorialShrine';
+import GhostSpiritSVG from '../components/GhostSpiritSVG';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const { user } = useGravequit();
+  const { user, items } = useGravequit();
+
+  // If user has quit items, pass them to the interactive shrine
+  const userQuits = items?.filter(item => item.status === 'quit') || [];
+  const shrineItems = userQuits.length > 0
+    ? userQuits.map(q => ({
+        title: q.title,
+        subtitle: q.reason_tag ? `Laid to Rest` : 'Laid to Rest',
+        tag: q.reason_tag ? `#${q.reason_tag}` : '#QuietClosure',
+        insight: q.reflection || 'A conscious choice to pause and reclaim mental bandwidth.'
+      }))
+    : undefined;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F0]">
       
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-16 px-4 md:px-8 overflow-hidden ambient-fog">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-xs text-[#A8C5B0]">
-            <Sparkles className="w-3.5 h-3.5 text-[#A8C5B0]" />
-            <span>Digital Sanctuary for Students</span>
-          </div>
+      {/* ── Hero Section ── */}
+      <section className="relative pt-20 pb-20 px-4 md:px-8 overflow-hidden flex flex-col items-center justify-center">
 
-          <h1 className="text-4xl md:text-6xl font-extrabold font-headline tracking-tight text-[#F5F5F0] leading-tight">
-            Understand why you quit, <br />
-            <span className="text-[#A8C5B0]">without the guilt.</span>
-          </h1>
+        {/* Ambient atmospheric fog layers */}
+        <div className="graveyard-fog" aria-hidden="true" />
+        <div className="cemetery-ground-mist" aria-hidden="true" />
 
-          <p className="text-base md:text-lg text-[#8A8A8A] max-w-2xl mx-auto font-body leading-relaxed">
-            Gravequit is a quitting journal for students. It captures the real reasons you pause courses, habits, and projects in a 10-second flow right at the moment of stopping — turning stopping into self-discovery.
-          </p>
+        {/* Radial glow behind headline */}
+        <div className="hero-glow" aria-hidden="true" />
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" variant="primary" onClick={() => navigate('/items')}>
-              <span>{user ? 'Go to My Items' : 'Start Your Journal'}</span>
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            {!user && (
-              <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
-                Log In
+        {/* ── Hero Content Grid (Headline & CTAs on Left, Memorial Shrine on Right) ── */}
+        <div className="relative z-10 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+
+          {/* Left Column: Typography, Value Proposition & CTA Actions */}
+          <div className="lg:col-span-7 text-center lg:text-left space-y-6">
+
+            {/* Pill badge */}
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#161A17] border border-[#27362B] text-xs text-[#A8C5B0] shadow-sm backdrop-blur-sm"
+              style={{ animation: 'fade-in-up 0.8s ease-out both' }}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#A8C5B0]" />
+              <span>Digital Sanctuary for Students</span>
+            </div>
+
+            {/* Staggered 3-line headline */}
+            <h1 className="font-headline font-extrabold tracking-tight leading-none space-y-1">
+              <span
+                className="block text-4xl sm:text-5xl md:text-6xl text-[#F5F5F0]"
+                style={{ animation: 'fade-in-up 0.9s ease-out 0.1s both' }}
+              >
+                LET GO.
+              </span>
+              <span
+                className="block text-4xl sm:text-5xl md:text-6xl text-[#A8C5B0]"
+                style={{ animation: 'fade-in-up 0.9s ease-out 0.3s both' }}
+              >
+                FIND CLARITY.
+              </span>
+              <span
+                className="block text-4xl sm:text-5xl md:text-6xl text-[#F5F5F0]"
+                style={{ animation: 'fade-in-up 0.9s ease-out 0.5s both' }}
+              >
+                NO GUILT.
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              className="text-sm sm:text-base md:text-lg text-[#8A8A8A] max-w-xl mx-auto lg:mx-0 font-body leading-relaxed"
+              style={{ animation: 'fade-in-up 0.9s ease-out 0.7s both' }}
+            >
+              Gravequit is a quitting journal for students. It captures the real reasons you pause
+              courses, habits, and projects in a 10-second flow — turning stopping into self-discovery.
+            </p>
+
+            {/* CTA buttons with hover glow */}
+            <div
+              className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5"
+              style={{ animation: 'fade-in-up 0.9s ease-out 0.9s both' }}
+            >
+              <div
+                className="rounded-button transition-shadow duration-300 w-full sm:w-auto"
+                style={{ '--glow': '0 0 22px rgba(168,197,176,0.35)' }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 22px rgba(168,197,176,0.35)'}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
+              >
+                <Button size="lg" variant="primary" onClick={() => navigate('/items')} className="w-full sm:w-auto">
+                  <span>{user ? 'Go to My Items' : 'Start Your Journal'}</span>
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+              {!user && (
+                <Button size="lg" variant="secondary" onClick={() => navigate('/login')} className="w-full sm:w-auto">
+                  Log In
+                </Button>
+              )}
+              <Button size="lg" variant="secondary" onClick={() => navigate('/about')} className="w-full sm:w-auto">
+                Read Our Story
               </Button>
-            )}
-            <Button size="lg" variant="secondary" onClick={() => navigate('/about')}>
-              Read Our Story
-            </Button>
+            </div>
+
+            {/* Reassurance badges */}
+            <div
+              className="pt-1 flex items-center justify-center lg:justify-start gap-6 text-xs text-[#8A8A8A]"
+              style={{ animation: 'fade-in-up 0.9s ease-out 1.1s both' }}
+            >
+              <div className="flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-[#A8C5B0]" />
+                <span>No streaks or badges</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#A8C5B0]" />
+                <span>10-second flow</span>
+              </div>
+            </div>
+
           </div>
 
-          {/* Quick reassurance badge */}
-          <div className="pt-6 flex items-center justify-center gap-6 text-xs text-[#8A8A8A]">
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-[#A8C5B0]" />
-              <span>No streaks or badges</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-[#A8C5B0]" />
-              <span>10-second flow</span>
-            </div>
+          {/* Right Column: Interactive 3D Memorial Shrine Diorama */}
+          <div
+            className="lg:col-span-5 flex justify-center"
+            style={{ animation: 'fade-in-up 1.0s ease-out 0.4s both' }}
+          >
+            <MemorialShrine items={shrineItems} />
           </div>
 
         </div>
@@ -118,7 +193,7 @@ export const LandingPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl space-y-3">
               <div className="w-8 h-8 rounded-full bg-[#354F3E] text-[#B0CEB8] flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
@@ -137,6 +212,14 @@ export const LandingPage = () => {
               <p className="text-xs text-[#8A8A8A] leading-relaxed">
                 Credits partial progress across all attempts. Formulated to celebrate expanding recovery windows instead of broken streaks.
               </p>
+            </div>
+
+            {/* Ghost spirit teaser — resurrection feature placeholder */}
+            <div
+              className="absolute -top-8 -right-4 animate-ghost-drift hidden md:block"
+              style={{ animationDelay: '1s' }}
+            >
+              <GhostSpiritSVG opacity={0.18} />
             </div>
           </div>
 

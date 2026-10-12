@@ -31,3 +31,13 @@ dist-ssr
 
 # Security Documentation
 SECURITY.md
+
+# Inactive image assets (preserved on disk for future use, untracked by Git)
+public/cemetery_hero_background.jpg
+public/gravestone_ancient.jpg
+public/gravestone_mossy.jpg
+public/solitary_gravestone.jpg
+public/memorial_shrine_diorama.jpg
+public/stone_arch.png
+public/stone_baroque.png
+public/stone_gothic.png
