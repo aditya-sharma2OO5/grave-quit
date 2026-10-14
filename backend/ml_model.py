@@ -39,9 +39,16 @@ class QuitRiskModel:
         print("Model trained and saved to", MODEL_PATH)
 
     def load_model(self):
-        if not os.path.exists(MODEL_PATH):
+        try:
+            if not os.path.exists(MODEL_PATH):
+                self.train_on_synthetic_data()
+            else:
+                self.model = joblib.load(MODEL_PATH)
+                if not hasattr(self.model, 'multi_class'):
+                    self.model.multi_class = 'auto'
+                self.model.predict_proba(np.array([[1, 0, 0]]))
+        except Exception:
             self.train_on_synthetic_data()
-        self.model = joblib.load(MODEL_PATH)
         
     def train(self, X, y):
         self.model = LogisticRegression()
@@ -54,8 +61,11 @@ class QuitRiskModel:
             self.load_model()
             
         features = np.array([[days_active, user_total_quit, user_total_completed]])
-        # Predict probability of class 1 (quit)
-        prob = self.model.predict_proba(features)[0][1]
+        try:
+            prob = self.model.predict_proba(features)[0][1]
+        except Exception:
+            self.train_on_synthetic_data()
+            prob = self.model.predict_proba(features)[0][1]
         
         # Return percentage rounded to 1 decimal place
         return round(prob * 100, 1)

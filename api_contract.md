@@ -8,7 +8,7 @@ This document serves as the shared contract between Frontend (Dev A), Backend (D
 ## Data Model (Core Tables)
 
 - **users**: `id`, `email`, `created_at`
-- **items**: `id`, `user_id`, `title`, `category` (course / habit / skill / other), `status` (active / quit / completed), `started_at`, `ended_at`
+- **items**: `id`, `user_id`, `parent_item_id` (nullable FK to items.id, on delete SET NULL), `title`, `category` (course / habit / skill / other), `status` (active / quit / completed), `started_at`, `ended_at`
 - **quit_reasons**: `id`, `item_id`, `reason_tag` (enum: too_busy / too_hard / lost_interest / no_deadline / other), `reason_text` (nullable), `voice_transcript` (nullable), `created_at`
 - **pattern_summaries**: `id`, `user_id`, `computed_stats` (JSON), `ai_summary_text`, `generated_at` (cached, regenerated on new quit event)
 
@@ -25,19 +25,21 @@ This document serves as the shared contract between Frontend (Dev A), Backend (D
 [
   {
     "id": 14,
-    "title": "DSA course",
+    "title": "DSA course (Modular 15-min Version)",
     "category": "course",
     "status": "active",
     "started_at": "2026-08-20T10:00:00Z",
-    "ended_at": null
+    "ended_at": null,
+    "parent_item_id": 12
   },
   {
     "id": 12,
-    "title": "30-day running streak",
-    "category": "habit",
+    "title": "DSA course",
+    "category": "course",
     "status": "quit",
     "started_at": "2026-08-01T10:00:00Z",
-    "ended_at": "2026-08-10T10:00:00Z"
+    "ended_at": "2026-08-10T10:00:00Z",
+    "parent_item_id": null
   }
 ]
 ```
@@ -45,22 +47,25 @@ This document serves as the shared contract between Frontend (Dev A), Backend (D
 ### 2. Create Item
 **POST** `/items`
 - **Auth Required:** Yes
-- **Purpose:** Create a new item for the current user. Status defaults to `active`.
+- **Purpose:** Create a new item for the current user. Status defaults to `active`. Optional `parent_item_id` to link a recommitted item to a discontinued predecessor.
 - **Request Body:**
 ```json
 {
-  "title": "DSA course",
-  "category": "course"
+  "title": "DSA course (Modular 15-min Version)",
+  "category": "course",
+  "note": "Re-committed as an easier version of 'DSA course'",
+  "parent_item_id": 12
 }
 ```
 - **Response:**
 ```json
 {
   "id": 14,
-  "title": "DSA course",
+  "title": "DSA course (Modular 15-min Version)",
   "category": "course",
   "status": "active",
-  "started_at": "2026-08-20T10:00:00Z"
+  "started_at": "2026-08-20T10:00:00Z",
+  "parent_item_id": 12
 }
 ```
 

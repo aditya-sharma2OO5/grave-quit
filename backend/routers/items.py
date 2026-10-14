@@ -80,6 +80,7 @@ def get_items(
             "note": item.note,
             "started_at": item.started_at,
             "ended_at": item.ended_at,
+            "parent_item_id": item.parent_item_id,
             "quit_reason": quit_reason_data,
             "risk_percentage": risk_pct,
             "driving_factor": driving_factor
@@ -93,11 +94,19 @@ def create_item(
     user: User = Depends(get_current_user)
 ):
     """Creates a new tracked item for the authenticated user."""
+    if item_in.parent_item_id is not None:
+        parent_item = db.query(Item).filter(Item.id == item_in.parent_item_id, Item.user_id == user.id).first()
+        if not parent_item:
+            raise HTTPException(status_code=404, detail="Parent item not found or does not belong to user")
+        if parent_item.status != "quit":
+            raise HTTPException(status_code=400, detail="Parent item must be in 'quit' status to recommit")
+
     new_item = Item(
         user_id=user.id,
         title=item_in.title.strip(),
         category=item_in.category or "Skill",
         note=item_in.note.strip() if item_in.note else None,
+        parent_item_id=item_in.parent_item_id,
         status="active",
         started_at=datetime.now(timezone.utc)
     )
@@ -112,6 +121,7 @@ def create_item(
         "note": new_item.note,
         "started_at": new_item.started_at,
         "ended_at": new_item.ended_at,
+        "parent_item_id": new_item.parent_item_id,
         "quit_reason": None
     }
 

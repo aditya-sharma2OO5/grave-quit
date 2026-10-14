@@ -96,6 +96,7 @@ class ItemCreate(BaseModel):
     title: str
     category: str = "Skill"
     note: Optional[str] = None
+    parent_item_id: Optional[int] = None
 
 class ItemResponse(BaseModel):
     id: int
@@ -105,6 +106,7 @@ class ItemResponse(BaseModel):
     note: Optional[str] = None
     started_at: datetime
     ended_at: Optional[datetime] = None
+    parent_item_id: Optional[int] = None
     quit_reason: Optional[QuitReasonDetail] = None
     risk_percentage: Optional[float] = None
     driving_factor: Optional[str] = None

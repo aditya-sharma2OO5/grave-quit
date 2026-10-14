@@ -420,8 +420,10 @@ export const GravequitProvider = ({ children }) => {
     
     const newTitle = `${sourceItem.title} (Modular 15-min Version)`;
     
-    // Check for duplicates
-    const alreadyExists = items.some(i => i.title === newTitle && i.status === 'active');
+    // Check for duplicates (active items with matching parent_item_id or identical modular title)
+    const alreadyExists = items.some(i => 
+      (i.parent_item_id === itemId || i.title === newTitle) && i.status === 'active'
+    );
     if (alreadyExists) {
       alert("You have already recommitted this item.");
       return false;
@@ -434,13 +436,14 @@ export const GravequitProvider = ({ children }) => {
         body: JSON.stringify({
           title: newTitle,
           category: sourceItem.category,
-          note: `Re-committed as an easier version of '${sourceItem.title}'.`
+          note: `Re-committed as an easier version of '${sourceItem.title}'.`,
+          parent_item_id: sourceItem.id
         }),
       });
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       
-      // Delete the old item to remove it from past observations
-      await deleteItem(itemId);
+      // Note: We preserve the sourceItem in the database (status: 'quit') 
+      // so parent_item_id foreign key linkage and historical quit reasons remain intact.
       
       await fetchItems();
       return true;

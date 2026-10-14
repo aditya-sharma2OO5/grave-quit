@@ -22,6 +22,7 @@ class Item(Base):
     __tablename__ = "items"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_item_id = Column(Integer, ForeignKey("items.id", ondelete="SET NULL"), nullable=True)
     title = Column(String, nullable=False)
     category = Column(String, default="Other")
     status = Column(String, default="active")  # active | quit | completed
@@ -30,6 +31,8 @@ class Item(Base):
     ended_at = Column(DateTime, nullable=True)
     
     reason = relationship("QuitReason", uselist=False, back_populates="item", cascade="all, delete-orphan")
+    parent = relationship("Item", remote_side=[id], foreign_keys=[parent_item_id], backref="recommitted_items")
+
 
 class QuitReason(Base):
     __tablename__ = "quit_reasons"

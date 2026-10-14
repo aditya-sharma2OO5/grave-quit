@@ -1,4 +1,5 @@
 import os
+import secrets
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -31,10 +32,24 @@ def test_full_system_flow():
 
     print("\n--- 2. Auth Flow (Signup & Login) ---")
     user_email = "test.student@univ.edu"
-    user_pass = "secureSanctuary2026"
+    user_pass = f"Test_{secrets.token_hex(6)}!A1"
     
+    # Seed verification code in test DB
+    from datetime import datetime, timezone, timedelta
+    from models import User, VerificationCode
+    db = TestingSessionLocal()
+    db.query(User).filter(User.email == user_email).delete()
+    db.query(VerificationCode).filter(VerificationCode.email == user_email).delete()
+    db.add(VerificationCode(
+        email=user_email,
+        code="123456",
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
+    ))
+    db.commit()
+    db.close()
+
     # Signup
-    signup_res = client.post("/auth/signup", json={"email": user_email, "password": user_pass})
+    signup_res = client.post("/auth/signup", json={"email": user_email, "password": user_pass, "code": "123456"})
     assert signup_res.status_code in [200, 400]
     
     # Login
@@ -98,19 +113,29 @@ def test_full_system_flow():
     print("Feedback submitted to database.")
 
     print("\n--- 5. Advisor & Internal Metrics Dashboards ---")
-    advisor_res = client.get("/metrics/advisor")
+    db = TestingSessionLocal()
+    from models import User
+    test_user = db.query(User).filter(User.id == user_id).first()
+    test_user.role = "admin"
+    db.commit()
+    db.close()
+
+    advisor_res = client.get("/metrics/advisor", headers=headers)
     assert advisor_res.status_code == 200
     assert "activeStudents" in advisor_res.json()
     assert "closureDrivers" in advisor_res.json()
     print("Advisor metrics calculated successfully.")
 
-    internal_res = client.get("/metrics/internal")
+    internal_res = client.get("/metrics/internal", headers=headers)
     assert internal_res.status_code == 200
     assert internal_res.json()["thumbsUpCount"] >= 1
     print(f"Internal metrics: {internal_res.json()['thumbsUpCount']} thumbs up, accuracy: {internal_res.json()['aiAccuracyRate']}%")
 
     print("\n--- 6. Retrain AI Model Endpoint ---")
-    retrain_res = client.post("/admin/retrain")
+    import routers.admin as admin_module
+    admin_module.ADMIN_API_KEY = "test-secret-admin-key"
+    admin_headers = {**headers, "X-Admin-Api-Key": "test-secret-admin-key"}
+    retrain_res = client.post("/admin/retrain", headers=admin_headers)
     assert retrain_res.status_code == 200
     assert retrain_res.json()["status"] == "success"
     print(f"Admin retrain completed: {retrain_res.json()['message']}")
@@ -121,10 +146,49 @@ def test_full_system_flow():
     assert "email_body" in digest_res.json()
     print("Weekly digest preview generated.")
 
-    print("\n--- 8. Delete Item ---")
+    print("\n--- 7b. Recommit Item with parent_item_id (Claim 9 Validation) ---")
+    # Valid recommit
+    recommit_res = client.post("/items", headers=headers, json={
+        "title": "Quantum Mechanics 101 (Modular 15-min Version)",
+        "category": "Course",
+        "note": "Re-committed as an easier version of Quantum Mechanics 101",
+        "parent_item_id": item_id
+    })
+    assert recommit_res.status_code == 200
+    recommit_item = recommit_res.json()
+    assert recommit_item["parent_item_id"] == item_id
+    recommit_id = recommit_item["id"]
+    print(f"Recommitted item #{recommit_id} referencing parent #{item_id}.")
+
+    # Invalid parent_item_id (doesn't exist) -> 404
+    bad_parent_res = client.post("/items", headers=headers, json={
+        "title": "Invalid Parent Item",
+        "parent_item_id": 999999
+    })
+    assert bad_parent_res.status_code == 404
+
+    # Invalid parent status (cannot recommit active item) -> 400
+    active_parent_res = client.post("/items", headers=headers, json={
+        "title": "Invalid Status Recommit",
+        "parent_item_id": recommit_id  # recommit_id is active
+    })
+    assert active_parent_res.status_code == 400
+    print("Recommit validations (404 and 400 status checks) verified.")
+
+    print("\n--- 8. Delete Parent Item & Verify ON DELETE SET NULL ---")
     del_res = client.delete(f"/items/{item_id}", headers=headers)
     assert del_res.status_code == 200
-    print(f"Deleted item #{item_id}.")
+    print(f"Deleted parent item #{item_id}.")
+
+    # Child item still exists
+    list_after_del = client.get("/items", headers=headers)
+    assert list_after_del.status_code == 200
+    child_in_db = next((i for i in list_after_del.json() if i["id"] == recommit_id), None)
+    assert child_in_db is not None
+    print(f"Child item #{recommit_id} preserved after parent deletion.")
+
+    # Cleanup child item
+    client.delete(f"/items/{recommit_id}", headers=headers)
 
     print("\n=== ALL INTEGRATION TESTS PASSED ===")
 
